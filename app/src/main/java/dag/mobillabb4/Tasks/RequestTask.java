@@ -33,7 +33,7 @@ public class RequestTask extends AsyncTask<String,Void,FirebaseMessage> {
         long now = System.currentTimeMillis();
         FirebaseMessage removeMessage = null;
         boolean keepGoing = true;
-        while(now+5000>System.currentTimeMillis() && keepGoing) {
+        while(now+10000>System.currentTimeMillis() && keepGoing) {
             for (FirebaseMessage fm : MyFirebaseMessaging.getMessageHeap()) {
                 if (fm.getId() == msgId) {
                     removeMessage = fm;
@@ -42,7 +42,9 @@ public class RequestTask extends AsyncTask<String,Void,FirebaseMessage> {
                 }
             }
         }
+        Log.i("Firebase","size: "+MyFirebaseMessaging.getMessageHeap().size());
         MyFirebaseMessaging.getMessageHeap().remove(removeMessage);
+        Log.i("Firebase","size2: "+MyFirebaseMessaging.getMessageHeap().size());
         return removeMessage;
     }
 }

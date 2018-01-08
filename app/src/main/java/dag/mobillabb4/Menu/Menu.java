@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
 import dag.mobillabb4.Activities.ChatRoomActivity;
 import dag.mobillabb4.Activities.LoginActivity;
 import dag.mobillabb4.Activities.MainChatActivity;
@@ -49,13 +51,18 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                             addTask = new RequestTask(new RequestTask.OnTaskCompleted() {
                                 @Override
                                 public void onTaskCompleted(FirebaseMessage result) {
-                                    if(result.getInformation().contains("success")) {
-                                        //TODO: result get id & get name, set target och öppna
-                                        //chatroom activitry med den persnen
-                                       // AccountModel.setTargetAccount;
-                                        intent = new Intent(activity, ChatRoomActivity.class);
-                                        activity.startActivity(intent);
-                                    }else{
+                                    try {
+                                        if (result.getInformation().get("status").toString().equals("success")) {
+                                            //TODO: result get id & get name, set target och öppna
+                                            AccountModel.setTargetAccount(new AccountModel(Integer.parseInt(
+                                                    result.getInformation().get("id").toString())
+                                                    ,result.getInformation().get("username").toString()));
+                                            intent = new Intent(activity, ChatRoomActivity.class);
+                                            activity.startActivity(intent);
+                                        } else {
+                                            Toast.makeText(activity, "Adding failed", Toast.LENGTH_LONG).show();
+                                        }
+                                    }catch(JSONException e){
                                         Toast.makeText(activity, "Adding failed", Toast.LENGTH_LONG).show();
                                     }
                                 }
@@ -73,8 +80,7 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     builder.show();
                     return true;
                 case R.id.profile:
-                    //TODO: hämta från databasen
-                    //ProfileModel.setInstance();
+                    AccountModel.setTargetAccount(AccountModel.getMyAccount());
                     intent = new Intent(activity, ProfileActivity.class);
                     activity.startActivity(intent);
                     return true;

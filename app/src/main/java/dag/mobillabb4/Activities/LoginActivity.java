@@ -21,6 +21,8 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONException;
+
 import dag.mobillabb4.Firebase.FirebaseMessage;
 import dag.mobillabb4.Firebase.Messages;
 import dag.mobillabb4.Firebase.MyFirebaseInstance;
@@ -104,12 +106,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 @Override
                 public void onTaskCompleted(FirebaseMessage result) {
                     try {
-                        if (result.getInformation().contains("success")) {
+                        if (Integer.parseInt(result.getInformation().get("id").toString())!=-1) {
+                            AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                             Intent intent = new Intent(context, MainChatActivity.class);
                             startActivity(intent);
                         } else
                             errorText.setText("Invalid login information");
-                    }catch(NullPointerException e){
+                    }catch(NullPointerException|JSONException e){
                         errorText.setText("Server timeout");
                     }
                     progress.setVisibility(View.INVISIBLE);

@@ -17,6 +17,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -77,14 +79,14 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onTaskCompleted(FirebaseMessage result) {
                     Log.i("Register","pressed");
                     try {
-                        if (result.getInformation().contains("success")) {
+                        if (result.getInformation().get("status").toString().equals("success")) {
                             statusText.setTextColor(Color.BLACK);
                             statusText.setText("Successfully created new account");
                         } else {
                             statusText.setTextColor(Color.RED);
                             statusText.setText("Error creating new account");
                         }
-                    }catch(NullPointerException e){
+                    }catch(NullPointerException|JSONException e){
                         //TODO: skicka delete account för säkerhetsskull, ta bort med email
                         statusText.setTextColor(Color.RED);
                         statusText.setText("Server timeout");

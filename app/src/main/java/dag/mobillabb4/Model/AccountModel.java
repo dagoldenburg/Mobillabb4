@@ -23,6 +23,11 @@ public class AccountModel {
         return myAccount;
     }
 
+    public static void initMyAcc(int id){
+        myAccount = new AccountModel();
+        myAccount.id = id;
+    }
+
     public static AccountModel getTargetAccount() {
         return targetAccount;
     }
@@ -65,15 +70,6 @@ public class AccountModel {
 
     }
 
-    /**
-     * Används när använder har autensierat sig mot backend
-     * @param id
-     */
-    public AccountModel(int id,Date birthDay){
-        myAccount = new AccountModel();
-        myAccount.id = id;
-        myAccount.birthday = birthday;
-    }
 
     /**
      * Används för add skapa konversationer i MainChatActivity

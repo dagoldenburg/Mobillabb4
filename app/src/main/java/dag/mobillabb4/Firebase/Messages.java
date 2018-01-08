@@ -20,9 +20,9 @@ public class Messages {
 
     public static int login(String email, String password){
         int msgId = rand.nextInt();
-        Log.i("Login",email+" "+password);
+        Log.i("Login",email+" "+password+" "+msgId);
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
-                .setMessageId(Long.toString(msgId))
+                .setMessageId(Integer.toString(msgId))
                 .addData("type","login")
                 .addData("e-mail", email)
                 .addData("password",password)
@@ -35,7 +35,7 @@ public class Messages {
         int msgId = rand.nextInt();
 
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
-                .setMessageId(Long.toString(msgId))
+                .setMessageId(Integer.toString(msgId))
                 .addData("type","register")
                 .addData("username",username)
                 .addData("password",password)
@@ -49,7 +49,7 @@ public class Messages {
     public static int sendMessage(int from, int to, String message){
         int msgId = rand.nextInt();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
-                .setMessageId(Long.toString(msgId))
+                .setMessageId(Integer.toString(msgId))
                 .addData("type","send")
                 .addData("from_user", Integer.toString(from))
                 .addData("to_user",Integer.toString(to))
@@ -62,7 +62,7 @@ public class Messages {
     public static int addContact(int from,String toEmail){
         int msgId = rand.nextInt();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
-                .setMessageId(Long.toString(msgId))
+                .setMessageId(Integer.toString(msgId))
                 .addData("type","addContact")
                 .addData("from_user", Integer.toString(from))
                 .addData("to_user_email",toEmail)
@@ -75,7 +75,7 @@ public class Messages {
     public static int getChatContacts(int myId){
         int msgId = rand.nextInt();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
-                .setMessageId(Long.toString(msgId))
+                .setMessageId(Integer.toString(msgId))
                 .addData("type","get_contacts")
                 .addData("my_id", Integer.toString(myId))
                 .setTtl(1200)
@@ -87,7 +87,7 @@ public class Messages {
     public static int getMessages(int myId,int targetId){
         int msgId = rand.nextInt();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
-                .setMessageId(Long.toString(msgId))
+                .setMessageId(Integer.toString(msgId))
                 .addData("type","get_messages")
                 .addData("my_id", Integer.toString(myId))
                 .addData("target_id", Integer.toString(targetId))
@@ -96,5 +96,15 @@ public class Messages {
         return msgId;
     }
 
+    public static int getProfile(int profileId){
+        int msgId = rand.nextInt();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","get_profile")
+                .addData("target_id", Integer.toString(profileId))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
 
 }

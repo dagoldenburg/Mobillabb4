@@ -5,6 +5,9 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -42,10 +45,15 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.d("Firebase", "Message data payload: " + remoteMessage.getData() + " Message id: "+remoteMessage.getMessageId());
             Map<String,String> map = remoteMessage.getData();
-            if(map.containsKey("login")){
-                messageHeap.add(new FirebaseMessage(Integer.parseInt(remoteMessage.getMessageId()),remoteMessage.getData().toString(),System.currentTimeMillis()));
-            }else if(map.containsKey("message")){
-                MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getData().toString());
+            String hej = map.get("message");
+            try {
+                JSONObject obj = new JSONObject(hej);
+                Log.i("Firebase",obj.get("messageId").toString());
+                Log.i("Firebase",map.toString() + "   "+hej);
+                messageHeap.add(new FirebaseMessage(Integer.parseInt(obj.get("messageId").toString()),obj,System.currentTimeMillis()));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 

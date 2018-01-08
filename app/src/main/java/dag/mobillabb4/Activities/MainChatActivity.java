@@ -60,7 +60,7 @@ public class MainChatActivity extends AppCompatActivity {
         getConversationTask = new RequestTask(new RequestTask.OnTaskCompleted() {
             @Override
             public void onTaskCompleted(FirebaseMessage result) {
-                Log.i("Conversations",result.getInformation());
+                //Log.i("Conversations",result.getInformation());
                 progress.setVisibility(View.INVISIBLE);
                 AccountModel.setConversations(null);
             }
