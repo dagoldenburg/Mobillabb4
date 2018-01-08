@@ -13,7 +13,6 @@ public class AccountModel {
     private int id;
     private String username;
     private String password;
-    private String confirmPassword;
     private String email;
     private Date birthday;
     private static AccountModel myAccount;
@@ -90,10 +89,9 @@ public class AccountModel {
         this.password = password;
     }
 
-    public AccountModel(String username, String password, String confirmPassword, String email, Date birthday) {
+    public AccountModel(String username, String password, String email, Date birthday) {
         this.username = username;
         this.password = password;
-        this.confirmPassword = confirmPassword;
         this.email = email;
         this.birthday = birthday;
     }
@@ -114,14 +112,6 @@ public class AccountModel {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
     }
 
     public String getEmail() {

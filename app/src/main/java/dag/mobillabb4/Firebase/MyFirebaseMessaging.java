@@ -51,17 +51,15 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
                 Log.i("Firebase",obj.get("messageId").toString());
                 Log.i("Firebase",map.toString() + "   "+hej);
                 messageHeap.add(new FirebaseMessage(Integer.parseInt(obj.get("messageId").toString()),obj,System.currentTimeMillis()));
-
+                //TODO: notification när man receive message
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
 
-        // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d("Firebase", "Message Notification Body: " + remoteMessage.getNotification().getBody());
             MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getNotification().getBody());
-
         }
 
         // Also if you intend on generating your own notifications as a result of a received FCM

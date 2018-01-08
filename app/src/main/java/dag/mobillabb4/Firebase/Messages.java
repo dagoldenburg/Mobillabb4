@@ -31,15 +31,13 @@ public class Messages {
         return msgId;
     }
 
-    public static int register(String username,String password, String confirmPassword,String email,Date date){
+    public static int register(String username,String password, String email,Date date){
         int msgId = rand.nextInt();
-
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","register")
                 .addData("username",username)
                 .addData("password",password)
-                .addData("confirmPassword",confirmPassword)
                 .addData("e-mail", email)
                 .addData("birthday", date.toString())
                 .build());

@@ -17,6 +17,10 @@ import android.widget.ProgressBar;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import dag.mobillabb4.CustomAdapters.ListViewAdapter;
@@ -61,6 +65,18 @@ public class MainChatActivity extends AppCompatActivity {
             @Override
             public void onTaskCompleted(FirebaseMessage result) {
                 //Log.i("Conversations",result.getInformation());
+                try{
+                JSONArray conversations = result.getInformation().getJSONArray("conversations");
+                ArrayList<AccountModel> temp = new ArrayList<>();
+                for(int i = 0;i<conversations.length();i++){
+                    temp.add(new AccountModel(Integer.parseInt(((JSONObject) conversations.get(i)).get("id").toString()),
+                            ((JSONObject) conversations.get(i)).get("username").toString()));
+
+                }
+                AccountModel.setConversations(temp);
+                }catch(JSONException e){
+
+                }
                 progress.setVisibility(View.INVISIBLE);
                 AccountModel.setConversations(null);
             }
@@ -72,7 +88,6 @@ public class MainChatActivity extends AppCompatActivity {
         adapter = new ListViewAdapter(this,AccountModel.getConversations());
         listView = findViewById(R.id.listView);
 
-        listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
@@ -90,11 +105,15 @@ public class MainChatActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 AccountModel.filterConversations(s.toString());
-                adapter = new ListViewAdapter(getApplicationContext(),AccountModel.getFilteredConversations());
-
+                updateListView();
             }
             @Override
             public void afterTextChanged(Editable s) {}
         });
+    }
+
+    private void updateListView(){
+        adapter = new ListViewAdapter(getApplicationContext(),AccountModel.getFilteredConversations());
+        listView.setAdapter(adapter);
     }
 }

@@ -74,32 +74,43 @@ public class RegisterActivity extends AppCompatActivity {
                             Integer.parseInt(day.getSelectedItem().toString()));
 
             Log.i("Register","pressed");
-            registerTask = new RequestTask(new RequestTask.OnTaskCompleted() {
-                @Override
-                public void onTaskCompleted(FirebaseMessage result) {
-                    Log.i("Register","pressed");
-                    try {
-                        if (result.getInformation().get("status").toString().equals("success")) {
-                            statusText.setTextColor(Color.BLACK);
-                            statusText.setText("Successfully created new account");
-                        } else {
-                            statusText.setTextColor(Color.RED);
-                            statusText.setText("Error creating new account");
+            if(email.getText().toString().isEmpty() ||
+                    password.getText().toString().isEmpty() ||
+                    confirmPassword.getText().toString().isEmpty()){
+                statusText.setTextColor(Color.RED);
+                statusText.setText("Fill all fields!");
+            }else {
+                if (confirmPassword.getText().toString().equals(password.getText().toString())) {
+                    registerTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted(FirebaseMessage result) {
+                            Log.i("Register", "pressed");
+                            try {
+                                if (result.getInformation().get("status").toString().equals("success")) {
+                                    statusText.setTextColor(Color.BLACK);
+                                    statusText.setText("Successfully created new account");
+                                } else {
+                                    statusText.setTextColor(Color.RED);
+                                    statusText.setText("Error creating new account");
+                                }
+                            } catch (NullPointerException | JSONException e) {
+                                //TODO: skicka delete account för säkerhetsskull, ta bort med email
+                                statusText.setTextColor(Color.RED);
+                                statusText.setText("Server timeout");
+                            }
+                            progress.setVisibility(View.INVISIBLE);
                         }
-                    }catch(NullPointerException|JSONException e){
-                        //TODO: skicka delete account för säkerhetsskull, ta bort med email
-                        statusText.setTextColor(Color.RED);
-                        statusText.setText("Server timeout");
-                    }
-                    progress.setVisibility(View.INVISIBLE);
+                    }, Messages.register(username.getText().toString(),
+                            password.getText().toString(),
+                            email.getText().toString(),
+                            date));
+                    registerTask.execute();
+                    progress.setVisibility(View.VISIBLE);
+                }else{
+                    statusText.setTextColor(Color.RED);
+                    statusText.setText("Passwords dont match!");
                 }
-            }, Messages.register(username.getText().toString(),
-                    password.getText().toString(),
-                    confirmPassword.getText().toString(),
-                    email.getText().toString(),
-                    date));
-            registerTask.execute();
-            progress.setVisibility(View.VISIBLE);
+            }
 
         }
     };

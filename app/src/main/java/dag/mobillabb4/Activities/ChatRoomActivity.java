@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -14,6 +15,10 @@ import android.widget.ProgressBar;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -34,6 +39,8 @@ public class ChatRoomActivity extends AppCompatActivity {
     private RequestTask getMessagesTask;
     private RequestTask sendMessageTask;
     private ProgressBar progress;
+    private MessageViewAdapter adapter;
+    ArrayList<JSONObject> messages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,24 +67,39 @@ public class ChatRoomActivity extends AppCompatActivity {
                 sendMessageTask = new RequestTask(new RequestTask.OnTaskCompleted() {
                     @Override
                     public void onTaskCompleted(FirebaseMessage result) {
-                        progress.setVisibility(View.VISIBLE);
+                        try {
+                            messages.add(new JSONObject("{\"id\":\""+AccountModel.getMyAccount().getId()+"\"," +
+                                                            "\"username\": \"me\"," +
+                                                            "\"content\":\""+message.getText().toString()+"\"}"));
+                        }catch(JSONException e){
+                            Log.i("Send",e.getMessage());
+                        }
+                        updateView();
                     }
                 }, Messages.sendMessage(AccountModel.getMyAccount().getId(),AccountModel.getTargetAccount().getId(),message.getText().toString()));
                 sendMessageTask.execute();
             }
         });
         sendBut.bringToFront();
-
+        messages = new ArrayList<>();
         context = this;
         listView = findViewById(R.id.messageList);
-        ArrayList<String> messages = new ArrayList<>();
         progress = findViewById(R.id.progressBar4);
-        MessageViewAdapter adapter = new MessageViewAdapter(this,messages);
+        adapter = new MessageViewAdapter(this,messages);
         listView.setAdapter(adapter);
         getMessagesTask = new RequestTask(new RequestTask.OnTaskCompleted() {
             @Override
             public void onTaskCompleted(FirebaseMessage result) {
-                progress.setVisibility(View.VISIBLE);
+                messages = new ArrayList<>();
+                try {
+                    JSONArray messagesjson = result.getInformation().getJSONArray("messages");
+                    for(int i=0;i<messagesjson.length();i++){
+                        messages.add(((JSONObject)messagesjson.get(i)));
+                    }
+                }catch(JSONException e){
+                    Log.i("ChatRoom",e.getMessage());
+                }
+                progress.setVisibility(View.INVISIBLE);
             }
         }, Messages.getMessages(AccountModel.getMyAccount().getId(),AccountModel.getTargetAccount().getId()));
         getMessagesTask.execute();
@@ -85,6 +107,10 @@ public class ChatRoomActivity extends AppCompatActivity {
         progress.bringToFront();
     }
 
+    public void updateView(){
+        adapter = new MessageViewAdapter(this,messages);
+        listView.setAdapter(adapter);
+    }
 
     @Override
     public boolean onSupportNavigateUp() {
