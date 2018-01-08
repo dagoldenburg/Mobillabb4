@@ -2,11 +2,14 @@ package dag.mobillabb4.Model;
 
 import java.util.Date;
 
+import dag.mobillabb4.Firebase.Messages;
+
 /**
  * Created by Dag on 1/2/2018.
  */
 
 public class AccountModel {
+    private int id;
     private String username;
     private String password;
     private String confirmPassword;
@@ -26,9 +29,11 @@ public class AccountModel {
         this.birthday = birthday;
     }
 
-    public static boolean login(String username, String password){
+    public static boolean login(String email, String password){
         //TODO: querry db for login
-        if(username.equals("asd")&&password.equals("asd"))
+
+        int msgId = Messages.login(email,password);
+        if(email.equals("asd")&&password.equals("asd"))
             return true;
         return false;
     }
@@ -81,4 +86,11 @@ public class AccountModel {
     }
 
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

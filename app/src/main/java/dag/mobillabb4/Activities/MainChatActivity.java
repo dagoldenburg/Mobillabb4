@@ -5,14 +5,18 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import java.util.ArrayList;
 
 import dag.mobillabb4.CustomAdapters.ListViewAdapter;
+import dag.mobillabb4.Firebase.MyFirebaseInstance;
 import dag.mobillabb4.Menu.Menu;
 import dag.mobillabb4.R;
 
@@ -25,6 +29,8 @@ public class MainChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        startService(new Intent(this,MyFirebaseInstance.class));
+        Log.d("Firebase", "token "+ FirebaseInstanceId.getInstance().getToken());
         setContentView(R.layout.activity_chat);
         Toolbar toolbar =  findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.options_menu);

@@ -6,7 +6,11 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
+
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.ArrayList;
 
@@ -18,6 +22,7 @@ public class ChatRoomActivity extends AppCompatActivity {
 
     private Context context;
     private ListView listView;
+    private static long msgId =0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,12 @@ public class ChatRoomActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //TODO: skicka meddelande till backend
+                FirebaseMessaging fm = FirebaseMessaging.getInstance();
+                fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                        .setMessageId(Long.toString(msgId++))
+                        .addData("my_message", "Hello World")
+                        .addData("my_action","SAY_HELLO")
+                        .build());
             }
         });
         sendBut.bringToFront();
