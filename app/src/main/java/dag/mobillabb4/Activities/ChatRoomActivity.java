@@ -1,6 +1,7 @@
 package dag.mobillabb4.Activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,14 +16,25 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.ArrayList;
 
 import dag.mobillabb4.CustomAdapters.MessageViewAdapter;
+import dag.mobillabb4.Firebase.FirebaseMessage;
+import dag.mobillabb4.Firebase.Messages;
 import dag.mobillabb4.Menu.Menu;
+import dag.mobillabb4.Model.AccountModel;
 import dag.mobillabb4.R;
+import dag.mobillabb4.Tasks.RequestTask;
 
 public class ChatRoomActivity extends AppCompatActivity {
 
     private Context context;
     private ListView listView;
-    private static long msgId =0;
+    private static long msgId = 0;
+    private int targetId;
+    private RequestTask getMessagesTask;
+
+
+    public ChatRoomActivity(int targetId){
+        this.targetId = targetId;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +71,18 @@ public class ChatRoomActivity extends AppCompatActivity {
         listView = findViewById(R.id.messageList);
         ArrayList<String> messages = new ArrayList<>();
 
-        for(int i =0;i<5;i++){
-            messages.add("message "+i);
-        }
         MessageViewAdapter adapter = new MessageViewAdapter(this,messages);
         listView.setAdapter(adapter);
+        getMessagesTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(FirebaseMessage result) {
+
+            }
+        }, Messages.getMessages(AccountModel.getMyAccount().getId(),targetId));
+        getMessagesTask.execute();
     }
+
+
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();

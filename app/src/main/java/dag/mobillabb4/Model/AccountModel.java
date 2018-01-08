@@ -15,7 +15,39 @@ public class AccountModel {
     private String confirmPassword;
     private String email;
     private Date birthday;
+    private static AccountModel myAccount;
 
+    public static AccountModel getMyAccount() {
+        return myAccount;
+    }
+
+    public AccountModel(){
+
+    }
+
+    /**
+     * Används när använder har autensierat sig mot backend
+     * @param id
+     */
+    public AccountModel(int id){
+        myAccount = new AccountModel();
+        myAccount.id = id;
+    }
+
+    /**
+     * Används för add skapa konversationer i MainChatActivity
+     * @param id
+     * @param username
+     */
+    public AccountModel(int id,String username){
+        this.id=id;
+        this.username=username;
+    }
+    /**
+     * Används för att logga in
+     * @param username
+     * @param password
+     */
     public AccountModel(String username, String password){
         this.username = username;
         this.password = password;
@@ -29,21 +61,6 @@ public class AccountModel {
         this.birthday = birthday;
     }
 
-    public static boolean login(String email, String password){
-        //TODO: querry db for login
-
-        int msgId = Messages.login(email,password);
-        if(email.equals("asd")&&password.equals("asd"))
-            return true;
-        return false;
-    }
-
-    public static boolean register(AccountModel account,boolean work){
-        //TODO: querry db for register
-
-            return work;
-
-    }
 
     public String getUsername() {
         return username;

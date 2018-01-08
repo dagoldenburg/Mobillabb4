@@ -5,13 +5,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,8 +23,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import dag.mobillabb4.Firebase.FirebaseMessage;
+import dag.mobillabb4.Firebase.Messages;
 import dag.mobillabb4.Model.AccountModel;
 import dag.mobillabb4.R;
+import dag.mobillabb4.Tasks.RequestTask;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -34,6 +41,8 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton;
     private TextView statusText;
     private Context context = this;
+    private RequestTask registerTask;
+    private ProgressBar progress;
     List<String> dayList;
     List<String> monthList;
     List<String> yearList;
@@ -52,28 +61,43 @@ public class RegisterActivity extends AppCompatActivity {
         day = findViewById(R.id.spinner);
         month = findViewById(R.id.spinner2);
         year = findViewById(R.id.spinner3);
-
+        progress = findViewById(R.id.progressBar2);
         initSpinners();
     }
     protected View.OnClickListener RegisterListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Date date = new Date(Integer.parseInt(year.getSelectedItem().toString()),
-                    Integer.parseInt(month.getSelectedItem().toString()),
+            Date date = new Date(Integer.parseInt(year.getSelectedItem().toString())-1900,
+                    Integer.parseInt(month.getSelectedItem().toString())-1,
                             Integer.parseInt(day.getSelectedItem().toString()));
 
-            AccountModel registerAccount = new AccountModel(username.getText().toString(),
+            Log.i("Register","pressed");
+            registerTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                @Override
+                public void onTaskCompleted(FirebaseMessage result) {
+                    Log.i("Register","pressed");
+                    try {
+                        if (result.getInformation().contains("success")) {
+                            statusText.setTextColor(Color.BLACK);
+                            statusText.setText("Successfully created new account");
+                        } else {
+                            statusText.setTextColor(Color.RED);
+                            statusText.setText("Error creating new account");
+                        }
+                    }catch(NullPointerException e){
+                        //TODO: skicka delete account för säkerhetsskull, ta bort med email
+                        statusText.setTextColor(Color.RED);
+                        statusText.setText("Server timeout");
+                    }
+                    progress.setVisibility(View.INVISIBLE);
+                }
+            }, Messages.register(username.getText().toString(),
                     password.getText().toString(),
                     confirmPassword.getText().toString(),
-                    email.getText().toString(),date
-                    );
-            if(AccountModel.register(registerAccount,false)){
-                statusText.setTextColor(Color.BLACK);
-                statusText.setText("Successfully created new account");
-            }else{
-                statusText.setTextColor(Color.RED);
-                statusText.setText("Error creating new account");
-            }
+                    email.getText().toString(),
+                    date));
+            registerTask.execute();
+            progress.setVisibility(View.VISIBLE);
 
         }
     };

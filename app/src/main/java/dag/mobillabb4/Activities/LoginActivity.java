@@ -1,16 +1,15 @@
 package dag.mobillabb4.Activities;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -20,13 +19,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.iid.FirebaseInstanceId;
 
-import dag.mobillabb4.Firebase.Constants;
+import dag.mobillabb4.Firebase.FirebaseMessage;
 import dag.mobillabb4.Firebase.Messages;
-import dag.mobillabb4.Firebase.MyNotificationManager;
+import dag.mobillabb4.Firebase.MyFirebaseInstance;
 import dag.mobillabb4.Model.AccountModel;
 import dag.mobillabb4.R;
-import dag.mobillabb4.Tasks.LoginTask;
+import dag.mobillabb4.Tasks.RequestTask;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -35,16 +35,19 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private EditText emailInput;
     private EditText passwordInput;
     private SignInButton signInButton;
+    private ProgressBar progress;
     private Context context = this;
     private TextView errorText;
     private static AccountModel accountData;
     private GoogleApiClient googleApiClient;
-    private LoginTask loginTask;
+    private RequestTask loginTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        startService(new Intent(this,MyFirebaseInstance.class));
+        Log.i("asd", FirebaseInstanceId.getInstance().getToken());
         loginButton = findViewById(R.id.button);
         loginButton.setOnClickListener(LoginListener);
         registerButton = findViewById(R.id.button3);
@@ -54,6 +57,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         errorText = findViewById(R.id.ErrorText);
         signInButton = findViewById(R.id.sign_in_button);
         signInButton.setOnClickListener(GoogleSignInListener);
+        progress = findViewById(R.id.progressBar);
 
         GoogleSignInOptions gsio = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -62,52 +66,58 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .enableAutoManage(this,this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API,gsio)
                 .build();
-    }
+        }
 
-    protected View.OnClickListener GoogleSignInListener = new View.OnClickListener(){
+        protected View.OnClickListener GoogleSignInListener = new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+                startActivityForResult(intent,9001);
+            }
+        };
         @Override
-        public void onClick(View v) {
-            Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-            startActivityForResult(intent,9001);
+        public void onActivityResult(int requestCode,int resultCode, Intent data){
+            super.onActivityResult(requestCode,resultCode,data);
+            if(requestCode == 9001){
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                if(result.isSuccess()){
+                    GoogleSignInAccount acc = result.getSignInAccount();
+                    acc.getEmail();
+                    Intent intent = new Intent(context, MainChatActivity.class);
+                    startActivity(intent);
+                }else
+                    errorText.setText("Invalid login information");
+            }
         }
-    };
-    @Override
-    public void onActivityResult(int requestCode,int resultCode, Intent data){
-        super.onActivityResult(requestCode,resultCode,data);
-        if(requestCode == 9001){
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if(result.isSuccess()){
-                GoogleSignInAccount acc = result.getSignInAccount();
-                acc.getEmail();
-                Intent intent = new Intent(context, MainChatActivity.class);
+        protected View.OnClickListener RegisterListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context,RegisterActivity.class);
                 startActivity(intent);
-            }else
-                errorText.setText("Invalid login information");
-        }
-    }
-    protected View.OnClickListener RegisterListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(context,RegisterActivity.class);
-            startActivity(intent);
-        }
-    };
+            }
+        };
 
     protected View.OnClickListener LoginListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             //TODO: kolla mot backend om det är korrekt login info annars får man felmeddelande
-            loginTask = new LoginTask(new LoginTask.OnTaskCompleted() {
+            loginTask = new RequestTask(new RequestTask.OnTaskCompleted() {
                 @Override
-                public void onTaskCompleted(boolean result) {
-                    if(result){
-                        Intent intent = new Intent(context, MainChatActivity.class);
-                        startActivity(intent);
-                    }else{
-                        errorText.setText("Invalid login information");
+                public void onTaskCompleted(FirebaseMessage result) {
+                    try {
+                        if (result.getInformation().contains("success")) {
+                            Intent intent = new Intent(context, MainChatActivity.class);
+                            startActivity(intent);
+                        } else
+                            errorText.setText("Invalid login information");
+                    }catch(NullPointerException e){
+                        errorText.setText("Server timeout");
                     }
+                    progress.setVisibility(View.INVISIBLE);
                 }
-            });
+            }, Messages.login(emailInput.getText().toString(),passwordInput.getText().toString()));
+            loginTask.execute();
+            progress.setVisibility(View.VISIBLE);
         }
     };
 

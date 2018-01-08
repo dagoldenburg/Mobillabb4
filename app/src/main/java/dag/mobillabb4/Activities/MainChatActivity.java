@@ -16,27 +16,31 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import java.util.ArrayList;
 
 import dag.mobillabb4.CustomAdapters.ListViewAdapter;
+import dag.mobillabb4.Firebase.FirebaseMessage;
+import dag.mobillabb4.Firebase.Messages;
 import dag.mobillabb4.Firebase.MyFirebaseInstance;
+import dag.mobillabb4.Firebase.MyFirebaseMessaging;
 import dag.mobillabb4.Menu.Menu;
+import dag.mobillabb4.Model.AccountModel;
 import dag.mobillabb4.R;
+import dag.mobillabb4.Tasks.RequestTask;
 
 public class MainChatActivity extends AppCompatActivity {
 
     private ListView listView;
     private Context context;
     private ImageButton mapButton;
+    private RequestTask getConversationTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        startService(new Intent(this,MyFirebaseInstance.class));
-        Log.d("Firebase", "token "+ FirebaseInstanceId.getInstance().getToken());
+        MyFirebaseMessaging.cleanUpMessageHeap();
         setContentView(R.layout.activity_chat);
         Toolbar toolbar =  findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.options_menu);
         toolbar.setOnMenuItemClickListener(new Menu(this));
         context = this;
-        listView = findViewById(R.id.listView);
         mapButton = findViewById(R.id.mapButton);
         mapButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,12 +49,10 @@ public class MainChatActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        ArrayList<String> messages = new ArrayList<>();
 
-        for(int i =0;i<5;i++){
-            messages.add("message "+i);
-        }
-        ListViewAdapter adapter = new ListViewAdapter(this,messages);
+        final ArrayList<AccountModel> conversations = new ArrayList<>();
+        ListViewAdapter adapter = new ListViewAdapter(this,conversations);
+        listView = findViewById(R.id.listView);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -60,5 +62,12 @@ public class MainChatActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+            getConversationTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                @Override
+                public void onTaskCompleted(FirebaseMessage result) {
+                    Log.i("Conversations",result.getInformation());
+                }
+            }, Messages.getChatContacts(AccountModel.getMyAccount().getId()));
+    getConversationTask.execute();
     }
 }

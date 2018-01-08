@@ -12,25 +12,38 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
     public MyFirebaseMessaging() {
     }
 
-    private static ArrayList<FirebaseMessage> messages = new ArrayList<>();
+    private static ArrayList<FirebaseMessage> messageHeap = new ArrayList<>();
 
-    public static ArrayList<FirebaseMessage> getMessages() {
-        return messages;
+    public static ArrayList<FirebaseMessage> getMessageHeap() {
+        return messageHeap;
+    }
+
+    public static void cleanUpMessageHeap(){
+        ArrayList<FirebaseMessage> cleanUpList = new ArrayList<>();
+        Log.i("Firebase","heap cleanup");
+        for(FirebaseMessage fm : messageHeap){
+            if(fm.getTime()+60000>System.currentTimeMillis()){
+                cleanUpList.add(fm);
+            }
+        }
+        for(FirebaseMessage fm : cleanUpList){
+            messageHeap.remove(fm);
+        }
     }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // ...
 
-        // TODO(developer): Handle FCM messages here.
-        // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
+        // TODO(developer): Handle FCM messageHeap here.
+        // Not getting messageHeap here? See why this may be: https://goo.gl/39bRNJ
         Log.d("Firebase", "From: " + remoteMessage.getFrom());
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d("Firebase", "Message data payload: " + remoteMessage.getData() + " Message id: "+remoteMessage.getMessageId());
             Map<String,String> map = remoteMessage.getData();
             if(map.containsKey("login")){
-                messages.add(new FirebaseMessage(Integer.parseInt(remoteMessage.getMessageId()),remoteMessage.getData().toString(),System.currentTimeMillis()));
+                messageHeap.add(new FirebaseMessage(Integer.parseInt(remoteMessage.getMessageId()),remoteMessage.getData().toString(),System.currentTimeMillis()));
             }else if(map.containsKey("message")){
                 MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getData().toString());
             }
