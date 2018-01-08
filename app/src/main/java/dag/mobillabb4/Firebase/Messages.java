@@ -46,7 +46,7 @@ public class Messages {
         return msgId;
     }
 
-    public static void sendMessage(int from, int to, String message){
+    public static int sendMessage(int from, int to, String message){
         int msgId = rand.nextInt();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Long.toString(msgId))
@@ -56,6 +56,20 @@ public class Messages {
                 .addData("message",message)
                 .setTtl(1200)
                 .build());
+        return msgId;
+    }
+
+    public static int addContact(int from,String toEmail){
+        int msgId = rand.nextInt();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Long.toString(msgId))
+                .addData("type","addContact")
+                .addData("from_user", Integer.toString(from))
+                .addData("to_user_email",toEmail)
+                .addData("message","has added you!")
+                .setTtl(1200)
+                .build());
+        return msgId;
     }
 
     public static int getChatContacts(int myId){
@@ -69,6 +83,7 @@ public class Messages {
         return msgId;
     }
 
+
     public static int getMessages(int myId,int targetId){
         int msgId = rand.nextInt();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
@@ -80,5 +95,6 @@ public class Messages {
                 .build());
         return msgId;
     }
+
 
 }

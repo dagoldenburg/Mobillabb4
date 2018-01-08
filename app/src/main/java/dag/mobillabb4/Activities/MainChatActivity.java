@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -31,6 +35,9 @@ public class MainChatActivity extends AppCompatActivity {
     private Context context;
     private ImageButton mapButton;
     private RequestTask getConversationTask;
+    private ProgressBar progress;
+    private EditText search;
+    private ListViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,25 +56,45 @@ public class MainChatActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        progress = findViewById(R.id.progressBar3);
+        getConversationTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(FirebaseMessage result) {
+                Log.i("Conversations",result.getInformation());
+                progress.setVisibility(View.INVISIBLE);
+                AccountModel.setConversations(null);
+            }
+        }, Messages.getChatContacts(AccountModel.getMyAccount().getId()));
+        getConversationTask.execute();
+        progress.setVisibility(View.VISIBLE);
+        progress.bringToFront();
 
-        final ArrayList<AccountModel> conversations = new ArrayList<>();
-        ListViewAdapter adapter = new ListViewAdapter(this,conversations);
+        adapter = new ListViewAdapter(this,AccountModel.getConversations());
         listView = findViewById(R.id.listView);
+
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
+                AccountModel.setTargetAccount(AccountModel.getConversations().get(position));
                 Intent intent = new Intent(context, ChatRoomActivity.class);
                 startActivity(intent);
             }
         });
-            getConversationTask = new RequestTask(new RequestTask.OnTaskCompleted() {
-                @Override
-                public void onTaskCompleted(FirebaseMessage result) {
-                    Log.i("Conversations",result.getInformation());
-                }
-            }, Messages.getChatContacts(AccountModel.getMyAccount().getId()));
-    getConversationTask.execute();
+
+        search = findViewById(R.id.mySearchText);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                AccountModel.filterConversations(s.toString());
+                adapter = new ListViewAdapter(getApplicationContext(),AccountModel.getFilteredConversations());
+
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
     }
 }

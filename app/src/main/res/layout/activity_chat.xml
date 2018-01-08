@@ -5,6 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="dag.mobillabb4.Activities.MainChatActivity">
+
+    <ProgressBar
+        android:id="@+id/progressBar3"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        tools:layout_editor_absoluteX="168dp"
+        tools:layout_editor_absoluteY="259dp" />
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -25,19 +35,19 @@
             app:srcCompat="?android:attr/listChoiceIndicatorSingle"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp" />
-            <EditText
-                android:id="@+id/myEditText"
-                android:layout_width="500px"
-                android:layout_height="100px"
-                android:background="#4d9c58"
-                android:hint="Search for users..."
-                android:radius="10dp"
-                android:textColor="@android:color/background_light"
-                tools:layout_editor_absoluteX="16dp"
-                tools:layout_editor_absoluteY="3dp"
-                android:maxLines="1"
-                android:inputType="text"
-                />
+
+        <EditText
+            android:id="@+id/mySearchText"
+            android:layout_width="500px"
+            android:layout_height="100px"
+            android:background="#4d9c58"
+            android:hint="Search for users..."
+            android:inputType="text"
+            android:maxLines="1"
+            android:radius="10dp"
+            android:textColor="@android:color/background_light"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="3dp" />
 
     </android.support.v7.widget.Toolbar>
 

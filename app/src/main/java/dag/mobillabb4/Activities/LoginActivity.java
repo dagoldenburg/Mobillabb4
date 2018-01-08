@@ -38,7 +38,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private ProgressBar progress;
     private Context context = this;
     private TextView errorText;
-    private static AccountModel accountData;
     private GoogleApiClient googleApiClient;
     private RequestTask loginTask;
 

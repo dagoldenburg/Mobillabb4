@@ -1,5 +1,6 @@
 package dag.mobillabb4.Model;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import dag.mobillabb4.Firebase.Messages;
@@ -16,9 +17,48 @@ public class AccountModel {
     private String email;
     private Date birthday;
     private static AccountModel myAccount;
+    private static AccountModel targetAccount;
 
     public static AccountModel getMyAccount() {
         return myAccount;
+    }
+
+    public static AccountModel getTargetAccount() {
+        return targetAccount;
+    }
+
+    public static void setTargetAccount(AccountModel targetAccount) {
+        AccountModel.targetAccount = targetAccount;
+    }
+    static ArrayList<AccountModel> conversations = new ArrayList<>();
+
+    public static ArrayList<AccountModel> getConversations() {
+        return conversations;
+    }
+
+    public static void setConversations(ArrayList<AccountModel> conversations) {
+        AccountModel.conversations = conversations;
+    }
+
+    static ArrayList<AccountModel> filteredConversations = new ArrayList<>();
+
+    public static ArrayList<AccountModel> getFilteredConversations() {
+        return filteredConversations;
+    }
+
+    public static void setFilteredConversations(ArrayList<AccountModel> filteredConversations) {
+        AccountModel.filteredConversations = filteredConversations;
+    }
+
+    public static void filterConversations(String filterString){
+        if(filterString.equals("")){
+            setFilteredConversations(conversations);
+        }
+        for(AccountModel am : conversations){
+            if(am.getUsername().startsWith(filterString)){
+                filteredConversations.add(am);
+            }
+        }
     }
 
     public AccountModel(){
@@ -29,9 +69,10 @@ public class AccountModel {
      * Används när använder har autensierat sig mot backend
      * @param id
      */
-    public AccountModel(int id){
+    public AccountModel(int id,Date birthDay){
         myAccount = new AccountModel();
         myAccount.id = id;
+        myAccount.birthday = birthday;
     }
 
     /**
@@ -60,6 +101,7 @@ public class AccountModel {
         this.email = email;
         this.birthday = birthday;
     }
+
 
 
     public String getUsername() {
