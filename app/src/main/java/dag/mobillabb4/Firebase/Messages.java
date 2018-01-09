@@ -5,6 +5,8 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
@@ -15,11 +17,20 @@ import java.util.Random;
  */
 
 public class Messages {
+
+    private static ArrayList<JSONObject> messages;
+
+    public static ArrayList<JSONObject> getMessages() {
+        return messages;
+    }
+    public static void resetMessages(){
+        messages = new ArrayList<>();
+    }
     private static Random rand = new Random();
     private static FirebaseMessaging fm = FirebaseMessaging.getInstance();
 
     public static int login(String email, String password){
-        int msgId = rand.nextInt();
+        int msgId = getFreeMsgId();
         Log.i("Login",email+" "+password+" "+msgId);
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
@@ -32,7 +43,7 @@ public class Messages {
     }
 
     public static int register(String username,String password, String email,Date date){
-        int msgId = rand.nextInt();
+        int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","register")
@@ -43,9 +54,32 @@ public class Messages {
                 .build());
         return msgId;
     }
+    public static int registerGoogle(String username,String password, String email){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","registerGoogle")
+                .addData("username",username)
+                .addData("password",password)
+                .addData("e-mail", email)
+                .addData("birthday", "")
+                .build());
+        return msgId;
+    }
+
+    public static int getIdByEmail(String email){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","get_id_by_email")
+                .addData("e-mail",email)
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
 
     public static int sendMessage(int from, int to, String message){
-        int msgId = rand.nextInt();
+        int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","send")
@@ -58,7 +92,7 @@ public class Messages {
     }
 
     public static int addContact(int from,String toEmail){
-        int msgId = rand.nextInt();
+        int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","addContact")
@@ -71,7 +105,7 @@ public class Messages {
     }
 
     public static int getChatContacts(int myId){
-        int msgId = rand.nextInt();
+        int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","get_contacts")
@@ -83,7 +117,7 @@ public class Messages {
 
 
     public static int getMessages(int myId,int targetId){
-        int msgId = rand.nextInt();
+        int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","get_messages")
@@ -95,7 +129,7 @@ public class Messages {
     }
 
     public static int getProfile(int profileId){
-        int msgId = rand.nextInt();
+        int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","get_profile")
@@ -103,6 +137,27 @@ public class Messages {
                 .setTtl(1200)
                 .build());
         return msgId;
+    }
+    
+    private static int getFreeMsgId(){
+        boolean keepGoing=true;
+        int msgId =  rand.nextInt();
+        while(keepGoing) {
+            msgId = rand.nextInt();
+            if(loop(msgId)){
+                break;
+            }
+        }
+        return msgId;
+    }
+    
+    private static boolean loop(int msgId){
+        for (FirebaseMessage fb : MyFirebaseMessaging.getMessageHeap()) {
+            if (fb.getId() == msgId) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

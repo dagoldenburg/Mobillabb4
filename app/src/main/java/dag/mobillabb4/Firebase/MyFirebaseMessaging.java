@@ -1,15 +1,20 @@
 package dag.mobillabb4.Firebase;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import dag.mobillabb4.Activities.ChatRoomActivity;
+import dag.mobillabb4.Model.AccountModel;
 
 public class MyFirebaseMessaging extends FirebaseMessagingService {
     public MyFirebaseMessaging() {
@@ -46,14 +51,30 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
             Log.d("Firebase", "Message data payload: " + remoteMessage.getData() + " Message id: "+remoteMessage.getMessageId());
             Map<String,String> map = remoteMessage.getData();
             String hej = map.get("message");
+            Log.i("hejhej",hej);
+            String id=null;
             try {
-                JSONObject obj = new JSONObject(hej);
-                Log.i("Firebase",obj.get("messageId").toString());
-                Log.i("Firebase",map.toString() + "   "+hej);
-                messageHeap.add(new FirebaseMessage(Integer.parseInt(obj.get("messageId").toString()),obj,System.currentTimeMillis()));
-                //TODO: notification när man receive message
-            } catch (JSONException e) {
-                e.printStackTrace();
+                JSONObject obj = null;
+                try {
+                    obj = new JSONObject(hej);
+                    Log.i("Firebase",hej);
+                    id = obj.get("messageId").toString();
+                    Log.i("Firebase", obj.get("messageId").toString());
+                    Log.i("Firebase", map.toString() + "   " + hej);
+                        /*if(obj.get("type").toString().equals("msg") &&
+                                Integer.parseInt(obj.get("userId").toString())== AccountModel.getTargetAccount().getId()){
+                            String msg = "{\"userid\":\""+Integer.parseInt(obj.get("userId").toString())+"\",\"username\": \""+
+                                    AccountModel.getTargetAccount().getUsername()+"\",\"content\":\""+obj.get("messageBody").toString()+"\"}";
+                            Messages.getMessages().add(new JSONObject(msg));
+                        }*/
+                    //TODO: notification när man receive message
+                    messageHeap.add(new FirebaseMessage(Integer.parseInt(id), obj, System.currentTimeMillis()));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                    Log.i("hejhej","hejj");
+            }catch(NullPointerException e){
+                Toast.makeText(this,"Cant retrieve conversations",Toast.LENGTH_LONG).show();
             }
         }
 
@@ -61,9 +82,6 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
             Log.d("Firebase", "Message Notification Body: " + remoteMessage.getNotification().getBody());
             MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getNotification().getBody());
         }
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
 
     }
 

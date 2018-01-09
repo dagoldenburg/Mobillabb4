@@ -1,5 +1,7 @@
 package dag.mobillabb4.Model;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -55,13 +57,18 @@ public class AccountModel {
     }
 
     public static void filterConversations(String filterString){
+        filteredConversations = new ArrayList<>();
+        Log.i("text",filterString);
         if(filterString.equals("")){
             setFilteredConversations(conversations);
-        }
-        for(AccountModel am : conversations){
-            if(am.getUsername().startsWith(filterString)){
-                filteredConversations.add(am);
+        }try {
+            for (AccountModel am : conversations) {
+                if (am.getUsername().startsWith(filterString)) {
+                    filteredConversations.add(am);
+                }
             }
+        }catch(NullPointerException e){
+            Log.i("filterConversation",e.getMessage());
         }
     }
 

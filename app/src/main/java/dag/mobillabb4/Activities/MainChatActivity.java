@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -66,16 +67,31 @@ public class MainChatActivity extends AppCompatActivity {
             public void onTaskCompleted(FirebaseMessage result) {
                 //Log.i("Conversations",result.getInformation());
                 try{
-                JSONArray conversations = result.getInformation().getJSONArray("conversations");
+                JSONArray conversations = result.getInformation().getJSONArray("conversation");
+                Log.i("hejhej2",conversations.toString());
                 ArrayList<AccountModel> temp = new ArrayList<>();
                 for(int i = 0;i<conversations.length();i++){
                     temp.add(new AccountModel(Integer.parseInt(((JSONObject) conversations.get(i)).get("id").toString()),
                             ((JSONObject) conversations.get(i)).get("username").toString()));
-
                 }
                 AccountModel.setConversations(temp);
-                }catch(JSONException e){
 
+                    AccountModel.setFilteredConversations(temp);
+                adapter = new ListViewAdapter(getApplicationContext(),AccountModel.getFilteredConversations());
+                listView.setAdapter(adapter);
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view,
+                                                int position, long id) {
+                            Log.i("lol",""+position);
+                            AccountModel.setTargetAccount(AccountModel.getFilteredConversations().get(position));
+                            Intent intent = new Intent(context, ChatRoomActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+                }catch(NullPointerException|JSONException e){
+                    e.printStackTrace();
+                    Toast.makeText(context, "No conversations to show", Toast.LENGTH_LONG).show();
                 }
                 progress.setVisibility(View.INVISIBLE);
                 AccountModel.setConversations(null);
@@ -85,18 +101,9 @@ public class MainChatActivity extends AppCompatActivity {
         progress.setVisibility(View.VISIBLE);
         progress.bringToFront();
 
-        adapter = new ListViewAdapter(this,AccountModel.getConversations());
         listView = findViewById(R.id.listView);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                AccountModel.setTargetAccount(AccountModel.getConversations().get(position));
-                Intent intent = new Intent(context, ChatRoomActivity.class);
-                startActivity(intent);
-            }
-        });
+
 
         search = findViewById(R.id.mySearchText);
         search.addTextChangedListener(new TextWatcher() {
@@ -104,16 +111,13 @@ public class MainChatActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.i("text","change");
                 AccountModel.filterConversations(s.toString());
-                updateListView();
+                adapter.notifyDataSetChanged();
             }
             @Override
             public void afterTextChanged(Editable s) {}
         });
     }
 
-    private void updateListView(){
-        adapter = new ListViewAdapter(getApplicationContext(),AccountModel.getFilteredConversations());
-        listView.setAdapter(adapter);
-    }
 }

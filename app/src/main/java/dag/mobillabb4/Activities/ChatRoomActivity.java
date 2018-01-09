@@ -2,6 +2,7 @@ package dag.mobillabb4.Activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -40,7 +41,6 @@ public class ChatRoomActivity extends AppCompatActivity {
     private RequestTask sendMessageTask;
     private ProgressBar progress;
     private MessageViewAdapter adapter;
-    ArrayList<JSONObject> messages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,34 +68,39 @@ public class ChatRoomActivity extends AppCompatActivity {
                     @Override
                     public void onTaskCompleted(FirebaseMessage result) {
                         try {
-                            messages.add(new JSONObject("{\"id\":\""+AccountModel.getMyAccount().getId()+"\"," +
-                                                            "\"username\": \"me\"," +
-                                                            "\"content\":\""+message.getText().toString()+"\"}"));
+                            String msg = "{\"userid\":\""+AccountModel.getMyAccount().getId()+"\",\"username\": \"me\",\"content\":\""+message.getText().toString()+"\"}";
+                            Log.i("Send",msg);
+                            Messages.getMessages().add(new JSONObject(msg));
                         }catch(JSONException e){
                             Log.i("Send",e.getMessage());
                         }
-                        updateView();
+
+                        adapter.notifyDataSetChanged();
                     }
                 }, Messages.sendMessage(AccountModel.getMyAccount().getId(),AccountModel.getTargetAccount().getId(),message.getText().toString()));
                 sendMessageTask.execute();
+                Log.i("send",message.getText().toString());
             }
         });
         sendBut.bringToFront();
-        messages = new ArrayList<>();
+        Messages.resetMessages();
         context = this;
         listView = findViewById(R.id.messageList);
         progress = findViewById(R.id.progressBar4);
-        adapter = new MessageViewAdapter(this,messages);
+        adapter = new MessageViewAdapter(this,Messages.getMessages());
         listView.setAdapter(adapter);
         getMessagesTask = new RequestTask(new RequestTask.OnTaskCompleted() {
             @Override
             public void onTaskCompleted(FirebaseMessage result) {
-                messages = new ArrayList<>();
+                Messages.resetMessages();
                 try {
                     JSONArray messagesjson = result.getInformation().getJSONArray("messages");
+
                     for(int i=0;i<messagesjson.length();i++){
-                        messages.add(((JSONObject)messagesjson.get(i)));
+                        Messages.getMessages().add(((JSONObject)messagesjson.get(i)));
                     }
+
+                    adapter.notifyDataSetChanged();
                 }catch(JSONException e){
                     Log.i("ChatRoom",e.getMessage());
                 }
@@ -105,11 +110,15 @@ public class ChatRoomActivity extends AppCompatActivity {
         getMessagesTask.execute();
         progress.setVisibility(View.VISIBLE);
         progress.bringToFront();
-    }
+        final Handler handler = new Handler();
+        handler.postDelayed( new Runnable() {
 
-    public void updateView(){
-        adapter = new MessageViewAdapter(this,messages);
-        listView.setAdapter(adapter);
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+                handler.postDelayed( this,  1000 );
+            }
+        },  1000 );
     }
 
     @Override

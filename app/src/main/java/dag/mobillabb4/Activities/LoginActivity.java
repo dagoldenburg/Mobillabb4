@@ -19,6 +19,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
@@ -42,13 +44,20 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private TextView errorText;
     private GoogleApiClient googleApiClient;
     private RequestTask loginTask;
-
+    private RequestTask registerGmailTask;
+    private RequestTask getIdByEmail;
+    private RequestTask getIdByEmail2;
+    private  GoogleSignInAccount acc;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         startService(new Intent(this,MyFirebaseInstance.class));
         Log.i("asd", FirebaseInstanceId.getInstance().getToken());
+        if(AccountModel.getMyAccount()!=null){
+            Intent intent = new Intent(context, MainChatActivity.class);
+            startActivity(intent);
+        }
         loginButton = findViewById(R.id.button);
         loginButton.setOnClickListener(LoginListener);
         registerButton = findViewById(R.id.button3);
@@ -59,7 +68,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         signInButton = findViewById(R.id.sign_in_button);
         signInButton.setOnClickListener(GoogleSignInListener);
         progress = findViewById(R.id.progressBar);
-
         GoogleSignInOptions gsio = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -72,6 +80,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         protected View.OnClickListener GoogleSignInListener = new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                Auth.GoogleSignInApi.signOut(googleApiClient);
                 Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
                 startActivityForResult(intent,9001);
             }
@@ -82,10 +91,27 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             if(requestCode == 9001){
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 if(result.isSuccess()){
-                    GoogleSignInAccount acc = result.getSignInAccount();
-                    acc.getEmail();
-                    Intent intent = new Intent(context, MainChatActivity.class);
-                    startActivity(intent);
+                    acc = result.getSignInAccount();
+                    Log.i("GoogleLogIn",acc.getEmail());
+                    getIdByEmail = new RequestTask(new RequestTask.OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted(FirebaseMessage result) {
+                            try {
+                                if (result.getInformation().get("status").equals("success")) {
+                                    AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
+                                    Intent intent = new Intent(context, MainChatActivity.class);
+                                    startActivity(intent);
+                                }
+                                else{
+                                    googleRegister();
+                                }
+                            }catch(JSONException e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }, Messages.getIdByEmail(acc.getEmail()));
+
+
                 }else
                     errorText.setText("Invalid login information");
             }
@@ -97,6 +123,43 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 startActivity(intent);
             }
         };
+
+        private void googleLogin2(){
+            getIdByEmail2 = new RequestTask(new RequestTask.OnTaskCompleted() {
+                @Override
+                public void onTaskCompleted(FirebaseMessage result) {
+                    try {
+                        if (result.getInformation().get("status").equals("success")) {
+                            AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
+                            Intent intent = new Intent(context, MainChatActivity.class);
+                            startActivity(intent);
+                        }
+                        else{
+                            googleRegister();
+                        }
+                    }catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, Messages.getIdByEmail(acc.getEmail()));
+        }
+
+        private void googleRegister(){
+            registerGmailTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                @Override
+                public void onTaskCompleted(FirebaseMessage result) {
+                    try {
+                        if (result.getInformation().get("status").equals("success")) {
+                            googleLogin2();
+                            Intent intent = new Intent(context, MainChatActivity.class);
+                            startActivity(intent);
+                        }
+                    }catch(JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }, Messages.registerGoogle(acc.getDisplayName(), "", acc.getEmail()));
+        }
 
     protected View.OnClickListener LoginListener = new View.OnClickListener() {
         @Override
@@ -113,7 +176,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         } else
                             errorText.setText("Invalid login information");
                     }catch(NullPointerException|JSONException e){
-                        errorText.setText("Server timeout");
+                        errorText.setText("Invalid login information");
                     }
                     progress.setVisibility(View.INVISIBLE);
                 }
@@ -122,10 +185,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             progress.setVisibility(View.VISIBLE);
         }
     };
-
-
-
-
 
 
     @Override

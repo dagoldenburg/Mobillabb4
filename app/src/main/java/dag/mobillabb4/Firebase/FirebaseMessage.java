@@ -1,5 +1,6 @@
 package dag.mobillabb4.Firebase;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -20,6 +21,7 @@ public class FirebaseMessage {
     public int getId() {
         return id;
     }
+
 
     public JSONObject getInformation() {
         return json;

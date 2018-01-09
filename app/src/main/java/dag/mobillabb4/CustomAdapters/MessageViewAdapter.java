@@ -56,17 +56,18 @@ public class MessageViewAdapter extends BaseAdapter {
         TextView textView2 = null;
 
         try {
-        if(dataSource.get(position).get("id")== AccountModel.getMyAccount().getId()) {
-            rowView = inflater.inflate(R.layout.message_item_conversation, parent, false);
-            textView = rowView.findViewById(R.id.leftFirst);
-            textView2 = rowView.findViewById(R.id.leftSecond);
-        } else {
+        if(Integer.parseInt(dataSource.get(position).get("userid").toString())== AccountModel.getMyAccount().getId()) {
             rowView = inflater.inflate(R.layout.message_item_conversation_right, parent, false);
             textView = rowView.findViewById(R.id.rightFirst);
             textView2 = rowView.findViewById(R.id.rightSecond);
+            textView.setText("Me");
+        } else {
+            rowView = inflater.inflate(R.layout.message_item_conversation, parent, false);
+            textView = rowView.findViewById(R.id.leftFirst);
+            textView2 = rowView.findViewById(R.id.leftSecond);
+            textView.setText(AccountModel.getTargetAccount().getUsername());
         }
-        textView.setText(dataSource.get(position).get("username").toString());
-        textView2.setText(dataSource.get(position).get("content").toString());
+        textView2.setText(dataSource.get(position).get("text").toString());
         }catch(JSONException e){
             Log.i("MessageViewAdapter",e.getMessage());
         }
