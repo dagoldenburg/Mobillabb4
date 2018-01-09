@@ -63,22 +63,17 @@ public class ChatRoomActivity extends AppCompatActivity {
         sendBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: skicka meddelande till backend
-                sendMessageTask = new RequestTask(new RequestTask.OnTaskCompleted() {
-                    @Override
-                    public void onTaskCompleted(FirebaseMessage result) {
-                        try {
-                            String msg = "{\"userid\":\""+AccountModel.getMyAccount().getId()+"\",\"username\": \"me\",\"content\":\""+message.getText().toString()+"\"}";
-                            Log.i("Send",msg);
-                            Messages.getMessages().add(new JSONObject(msg));
-                        }catch(JSONException e){
-                            Log.i("Send",e.getMessage());
-                        }
-
-                        adapter.notifyDataSetChanged();
-                    }
-                }, Messages.sendMessage(AccountModel.getMyAccount().getId(),AccountModel.getTargetAccount().getId(),message.getText().toString()));
-                sendMessageTask.execute();
+                //TODO:gör så att backend skickar ut message till båda istället för att skriva det själv
+                try {
+                    String msg = "{\"userid\":\""+AccountModel.getMyAccount().getId()+"\",\"username\": \"me\",\"text\":\""+message.getText().toString()+"\"}";
+                    Log.i("Send",msg);
+                    Messages.getMessages().add(new JSONObject(msg));
+                }catch(JSONException e){
+                    Log.i("Send",e.getMessage());
+                }
+                adapter = new MessageViewAdapter(context,Messages.getMessages());
+                listView.setAdapter(adapter);
+                Messages.sendMessage(AccountModel.getMyAccount().getId(),AccountModel.getTargetAccount().getId(),message.getText().toString());
                 Log.i("send",message.getText().toString());
             }
         });
@@ -95,12 +90,12 @@ public class ChatRoomActivity extends AppCompatActivity {
                 Messages.resetMessages();
                 try {
                     JSONArray messagesjson = result.getInformation().getJSONArray("messages");
-
+                    Log.i("arg",messagesjson.toString());
                     for(int i=0;i<messagesjson.length();i++){
                         Messages.getMessages().add(((JSONObject)messagesjson.get(i)));
                     }
-
-                    adapter.notifyDataSetChanged();
+                    adapter = new MessageViewAdapter(context,Messages.getMessages());
+                    listView.setAdapter(adapter);
                 }catch(JSONException e){
                     Log.i("ChatRoom",e.getMessage());
                 }
@@ -115,7 +110,8 @@ public class ChatRoomActivity extends AppCompatActivity {
 
             @Override
             public void run() {
-                adapter.notifyDataSetChanged();
+                adapter = new MessageViewAdapter(context,Messages.getMessages());
+                    listView.setAdapter(adapter);
                 handler.postDelayed( this,  1000 );
             }
         },  1000 );

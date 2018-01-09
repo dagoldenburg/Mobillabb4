@@ -53,7 +53,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         startService(new Intent(this,MyFirebaseInstance.class));
-        Log.i("asd", FirebaseInstanceId.getInstance().getToken());
         if(AccountModel.getMyAccount()!=null){
             Intent intent = new Intent(context, MainChatActivity.class);
             startActivity(intent);

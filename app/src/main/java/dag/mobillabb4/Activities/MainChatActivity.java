@@ -49,6 +49,8 @@ public class MainChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         MyFirebaseMessaging.cleanUpMessageHeap();
         setContentView(R.layout.activity_chat);
+
+        Log.i("asd", FirebaseInstanceId.getInstance().getToken());
         Toolbar toolbar =  findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.options_menu);
         toolbar.setOnMenuItemClickListener(new Menu(this));
