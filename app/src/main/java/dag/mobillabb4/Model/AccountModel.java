@@ -28,6 +28,9 @@ public class AccountModel {
         myAccount = new AccountModel();
         myAccount.id = id;
     }
+    public static void logOut(){
+        myAccount = null;
+    }
 
     public static AccountModel getTargetAccount() {
         return targetAccount;

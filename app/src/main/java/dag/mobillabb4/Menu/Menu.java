@@ -5,10 +5,13 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.gms.auth.api.Auth;
 
 import org.json.JSONException;
 
@@ -43,7 +46,7 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                     builder.setTitle("Enter e-mail");
                     final EditText input = new EditText(activity);
-                    input.setInputType(InputType.TYPE_CLASS_TEXT);
+                    input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                     builder.setView(input);
                     builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
@@ -52,8 +55,9 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                                 @Override
                                 public void onTaskCompleted(FirebaseMessage result) {
                                     try {
+                                        Log.i("hejhejsan",":))");
                                         if (result.getInformation().get("status").toString().equals("success")) {
-                                            //TODO: result get id & get name, set target och öppna
+                                            Log.i("hejhejsan",":))!!!");
                                             AccountModel.setTargetAccount(new AccountModel(Integer.parseInt(
                                                     result.getInformation().get("id").toString())
                                                     ,result.getInformation().get("username").toString()));
@@ -62,7 +66,7 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                                         } else {
                                             Toast.makeText(activity, "Adding failed", Toast.LENGTH_LONG).show();
                                         }
-                                    }catch(JSONException e){
+                                    }catch(JSONException|NullPointerException e){
                                         Toast.makeText(activity, "Adding failed", Toast.LENGTH_LONG).show();
                                     }
                                 }
@@ -89,6 +93,12 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     activity.startActivity(intent);
                     return true;
                 case R.id.logout:
+                    try {
+                        Auth.GoogleSignInApi.signOut(LoginActivity.getGoogleApiClient());
+                    }catch(IllegalStateException e){
+
+                    }
+                    AccountModel.logOut();
                     activity.finish();
                     return true;
                 default:

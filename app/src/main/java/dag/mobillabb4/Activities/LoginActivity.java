@@ -42,12 +42,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private ProgressBar progress;
     private Context context = this;
     private TextView errorText;
-    private GoogleApiClient googleApiClient;
+    private static GoogleApiClient googleApiClient;
     private RequestTask loginTask;
     private RequestTask registerGmailTask;
     private RequestTask getIdByEmail;
     private RequestTask getIdByEmail2;
     private  GoogleSignInAccount acc;
+
+    public static GoogleApiClient getGoogleApiClient() {
+        return googleApiClient;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +101,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         @Override
                         public void onTaskCompleted(FirebaseMessage result) {
                             try {
+                                Log.i("hehe","tjoho3");
                                 if (result.getInformation().get("status").equals("success")) {
+                                    Log.i("hehe","tjoho4");
                                     AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                                     Intent intent = new Intent(context, MainChatActivity.class);
                                     startActivity(intent);
@@ -104,12 +111,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 else{
                                     googleRegister();
                                 }
-                            }catch(JSONException e){
+                            }catch(JSONException|NullPointerException e){
                                 e.printStackTrace();
+                                errorText.setText("Google login failed");
                             }
                         }
                     }, Messages.getIdByEmail(acc.getEmail()));
-
+                    getIdByEmail.execute();
 
                 }else
                     errorText.setText("Invalid login information");
@@ -128,19 +136,23 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 @Override
                 public void onTaskCompleted(FirebaseMessage result) {
                     try {
+                        Log.i("hehe","tjoho");
                         if (result.getInformation().get("status").equals("success")) {
+                            Log.i("hehe","tjoho2");
                             AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                             Intent intent = new Intent(context, MainChatActivity.class);
                             startActivity(intent);
                         }
                         else{
-                            googleRegister();
+                            finish();
                         }
-                    }catch(JSONException e){
+                    }catch(JSONException|NullPointerException e){
                         e.printStackTrace();
+                        errorText.setText("Google login failed");
                     }
                 }
             }, Messages.getIdByEmail(acc.getEmail()));
+            getIdByEmail2.execute();
         }
 
         private void googleRegister(){
@@ -150,14 +162,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     try {
                         if (result.getInformation().get("status").equals("success")) {
                             googleLogin2();
-                            Intent intent = new Intent(context, MainChatActivity.class);
-                            startActivity(intent);
                         }
-                    }catch(JSONException e){
+                    }catch(JSONException|NullPointerException e){
                         e.printStackTrace();
+                        errorText.setText("Google login failed");
                     }
                 }
             }, Messages.registerGoogle(acc.getDisplayName(), "", acc.getEmail()));
+            registerGmailTask.execute();
         }
 
     protected View.OnClickListener LoginListener = new View.OnClickListener() {

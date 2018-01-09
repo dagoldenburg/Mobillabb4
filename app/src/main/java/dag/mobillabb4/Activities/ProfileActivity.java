@@ -24,6 +24,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView profilePic;
     private TextView birthday;
     private ProgressBar progress;
+
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +37,12 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onTaskCompleted(FirebaseMessage result) {
                 try {
-                    if (Integer.parseInt(result.getInformation().get("id").toString())!=-1) {
-                        AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                         birthday.setText(result.getInformation().get("birthday").toString());
                         name.setText(result.getInformation().get("name").toString());
                         birthday.setVisibility(View.VISIBLE);
                         name.setVisibility(View.VISIBLE);
-                    } else
-                        Toast.makeText(getApplicationContext(), "Couldn't load profile", Toast.LENGTH_LONG).show();
                 }catch(NullPointerException|JSONException e){
+                    e.printStackTrace();
                     Toast.makeText(getApplicationContext(), "Couldn't load profile", Toast.LENGTH_LONG).show();
                 }
                 progress.setVisibility(View.INVISIBLE);

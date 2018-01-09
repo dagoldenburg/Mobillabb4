@@ -64,45 +64,8 @@ public class MainChatActivity extends AppCompatActivity {
             }
         });
         progress = findViewById(R.id.progressBar3);
-        getConversationTask = new RequestTask(new RequestTask.OnTaskCompleted() {
-            @Override
-            public void onTaskCompleted(FirebaseMessage result) {
-                //Log.i("Conversations",result.getInformation());
-                try{
-                JSONArray conversations = result.getInformation().getJSONArray("conversation");
-                Log.i("hejhej2",conversations.toString());
-                ArrayList<AccountModel> temp = new ArrayList<>();
-                for(int i = 0;i<conversations.length();i++){
-                    temp.add(new AccountModel(Integer.parseInt(((JSONObject) conversations.get(i)).get("id").toString()),
-                            ((JSONObject) conversations.get(i)).get("username").toString()));
-                }
-                AccountModel.setConversations(temp);
-
-                    AccountModel.setFilteredConversations(temp);
-                adapter = new ListViewAdapter(getApplicationContext(),AccountModel.getFilteredConversations());
-                listView.setAdapter(adapter);
-                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view,
-                                                int position, long id) {
-                            Log.i("lol",""+position);
-                            AccountModel.setTargetAccount(AccountModel.getFilteredConversations().get(position));
-                            Intent intent = new Intent(context, ChatRoomActivity.class);
-                            startActivity(intent);
-                        }
-                    });
-                }catch(NullPointerException|JSONException e){
-                    e.printStackTrace();
-                    Toast.makeText(context, "No conversations to show", Toast.LENGTH_LONG).show();
-                }
-                progress.setVisibility(View.INVISIBLE);
-                AccountModel.setConversations(null);
-            }
-        }, Messages.getChatContacts(AccountModel.getMyAccount().getId()));
-        getConversationTask.execute();
         progress.setVisibility(View.VISIBLE);
         progress.bringToFront();
-
         listView = findViewById(R.id.listView);
 
 
@@ -122,4 +85,45 @@ public class MainChatActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getConversationTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(FirebaseMessage result) {
+                //Log.i("Conversations",result.getInformation());
+                try{
+                    JSONArray conversations = result.getInformation().getJSONArray("conversation");
+                    Log.i("hejhej2",conversations.toString());
+                    ArrayList<AccountModel> temp = new ArrayList<>();
+                    for(int i = 0;i<conversations.length();i++){
+                        temp.add(new AccountModel(Integer.parseInt(((JSONObject) conversations.get(i)).get("id").toString()),
+                                ((JSONObject) conversations.get(i)).get("username").toString()));
+                    }
+                    AccountModel.setConversations(temp);
+
+                    AccountModel.setFilteredConversations(temp);
+                    adapter = new ListViewAdapter(getApplicationContext(),AccountModel.getFilteredConversations());
+                    listView.setAdapter(adapter);
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view,
+                                                int position, long id) {
+                            Log.i("lol",""+position);
+                            AccountModel.setTargetAccount(AccountModel.getFilteredConversations().get(position));
+                            Intent intent = new Intent(context, ChatRoomActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+                }catch(NullPointerException|JSONException e){
+                    e.printStackTrace();
+                    Toast.makeText(context, "No conversations to show", Toast.LENGTH_LONG).show();
+                }
+
+                progress.setVisibility(View.INVISIBLE);
+                AccountModel.setConversations(null);
+            }
+        }, Messages.getChatContacts(AccountModel.getMyAccount().getId()));
+        getConversationTask.execute();
+    }
 }

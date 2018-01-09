@@ -75,6 +75,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                 listView.setAdapter(adapter);
                 Messages.sendMessage(AccountModel.getMyAccount().getId(),AccountModel.getTargetAccount().getId(),message.getText().toString());
                 Log.i("send",message.getText().toString());
+                message.setText("");
             }
         });
         sendBut.bringToFront();

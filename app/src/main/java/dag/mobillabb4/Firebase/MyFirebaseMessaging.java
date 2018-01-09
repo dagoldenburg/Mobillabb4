@@ -61,14 +61,14 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
                     id = obj.get("messageId").toString();
                     Log.i("Firebase", obj.get("messageId").toString());
                     Log.i("Firebase", map.toString() + "   " + hej);
-                        if(obj.get("type").toString().equals("msg") &&
-                                Integer.parseInt(obj.get("userId").toString())== AccountModel.getTargetAccount().getId()){
-                            String msg = "{\"userid\":\""+Integer.parseInt(obj.get("userId").toString())+"\",\"username\": \""+
-                                    AccountModel.getTargetAccount().getUsername()+"\",\"text\":\""+obj.get("messageBody").toString()+"\"}";
+                    if(obj.get("type").toString().equals("msg")) {
+                        MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getData().get("messageBody"));
+                        if (Integer.parseInt(obj.get("userId").toString()) == AccountModel.getTargetAccount().getId()) {
+                            String msg = "{\"userid\":\"" + Integer.parseInt(obj.get("userId").toString()) + "\",\"username\": \"" +
+                                    AccountModel.getTargetAccount().getUsername() + "\",\"text\":\"" + obj.get("messageBody").toString() + "\"}";
                             Messages.getMessages().add(new JSONObject(msg));
-                            MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getNotification().getBody());
-
                         }
+                    }
                     //TODO: notification när man receive message
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -76,7 +76,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
                 if(obj!=null)
                     messageHeap.add(new FirebaseMessage(Integer.parseInt(id), obj, System.currentTimeMillis()));
             }catch(NullPointerException e){
-                Toast.makeText(this,"Cant retrieve conversations",Toast.LENGTH_LONG).show();
+                e.printStackTrace();
             }
         }
 
