@@ -20,12 +20,26 @@
         android:id="@+id/rightSecond"
         android:layout_width="fill_parent"
         android:layout_height="26dip"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="15dp"
         android:gravity="right"
         android:singleLine="true"
         android:text="Description"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/rightThird"
+        android:layout_width="fill_parent"
+        android:layout_height="26dip"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="25dp"
+        android:gravity="right"
+        android:singleLine="true"
+        android:text="Description2"
         android:textSize="12sp" />
 
 </RelativeLayout>
