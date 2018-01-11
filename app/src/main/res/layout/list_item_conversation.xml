@@ -27,16 +27,28 @@
 
     <TextView
         android:id="@+id/firstLine"
-        android:layout_width="fill_parent"
+        android:layout_width="130dp"
         android:layout_height="wrap_content"
         android:layout_above="@id/secondLine"
-        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:textColor="#000000"
         android:layout_alignWithParentIfMissing="true"
         android:layout_toRightOf="@id/icon"
         android:gravity="center_vertical"
         android:text="Example application"
+        android:textColor="#000000"
         android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/thirdLine"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/secondLine"
+        android:layout_alignParentTop="true"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toRightOf="@id/firstLine"
+        android:gravity="center_vertical"
+        android:text="Example application"
+        android:textColor="#d3d3d3"
+        android:textSize="12sp" />
 
 </RelativeLayout>
