@@ -90,6 +90,16 @@ public class Messages {
                 .build());
         return msgId;
     }
+    public static  int logout (int id){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","logout")
+                .addData("id",Integer.toString(id))
+                .setTtl(1200)
+                .build());
+        return  msgId;
+    }
 
     public static int addContact(int from,String toEmail){
         int msgId = getFreeMsgId();
