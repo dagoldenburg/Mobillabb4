@@ -54,20 +54,24 @@ public class MessageViewAdapter extends BaseAdapter {
         View rowView = null;
         TextView textView = null;
         TextView textView2 = null;
+        TextView textView3 = null;
 
         try {
         if(Integer.parseInt(dataSource.get(position).get("userid").toString())== AccountModel.getMyAccount().getId()) {
             rowView = inflater.inflate(R.layout.message_item_conversation_right, parent, false);
             textView = rowView.findViewById(R.id.rightFirst);
             textView2 = rowView.findViewById(R.id.rightSecond);
+            textView3 = rowView.findViewById(R.id.rightThird);
             textView.setText("Me");
         } else {
             rowView = inflater.inflate(R.layout.message_item_conversation, parent, false);
             textView = rowView.findViewById(R.id.leftFirst);
             textView2 = rowView.findViewById(R.id.leftSecond);
+            textView3 = rowView.findViewById(R.id.leftThird);
             textView.setText(AccountModel.getTargetAccount().getUsername());
         }
-        textView2.setText(dataSource.get(position).get("text").toString());
+        textView3.setText(dataSource.get(position).get("messageBody").toString());
+        textView2.setText(dataSource.get(position).get("timeStamp").toString());
         }catch(JSONException e){
             Log.i("MessageViewAdapter",e.getMessage());
         }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import dag.mobillabb4.Model.AccountModel;
+import dag.mobillabb4.Model.ConversationModel;
 import dag.mobillabb4.R;
 
 /**
@@ -20,9 +21,9 @@ import dag.mobillabb4.R;
 public class ListViewAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater inflater;
-    private ArrayList<AccountModel> dataSource;
+    private ArrayList<ConversationModel> dataSource;
 
-    public ListViewAdapter(Context context, ArrayList<AccountModel> items) {
+    public ListViewAdapter(Context context, ArrayList<ConversationModel> items) {
         this.context = context;
         dataSource = items;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -50,11 +51,17 @@ public class ListViewAdapter extends BaseAdapter {
         View rowView = inflater.inflate(R.layout.list_item_conversation, parent, false);
         TextView textView =  rowView.findViewById(R.id.firstLine);
         TextView textView2 =  rowView.findViewById(R.id.secondLine);
+        TextView textView3 =  rowView.findViewById(R.id.thirdLine);
         ImageView imageView = rowView.findViewById(R.id.icon);
-        textView.setText(dataSource.get(position).getUsername());
-        textView2.setText("message");
+        textView.setText(dataSource.get(position).getOwner().getUsername());
+        textView2.setText(dataSource.get(position).getMessage());
+        textView3.setText(dataSource.get(position).getDate());
+
+
         imageView.setImageResource(R.drawable.ic_launcher_background);
 
         return rowView;
     }
+
+
 }

@@ -7,8 +7,14 @@
         android:id="@+id/profile"
         android:title="My profile" />
     <item
-        android:id="@+id/preferences"
-        android:title="Preferences" />
+        android:id="@+id/changeName"
+        android:title="Change username" />
+    <item
+        android:id="@+id/uploadPicture"
+        android:title="Upload profile picture" />
+    <item
+        android:id="@+id/stopMap"
+        android:title="Stop GPS tracking" />
     <item
         android:id="@+id/logout"
         android:title="Log out" />

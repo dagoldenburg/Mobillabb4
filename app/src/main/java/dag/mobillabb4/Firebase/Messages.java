@@ -113,6 +113,17 @@ public class Messages {
                 .build());
         return msgId;
     }
+    public static int deleteContact(int from,int to){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","deleteContact")
+                .addData("from_user", Integer.toString(from))
+                .addData("to_user",Integer.toString(to))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
 
     public static int getChatContacts(int myId){
         int msgId = getFreeMsgId();
@@ -125,6 +136,17 @@ public class Messages {
         return msgId;
     }
 
+    public static int changeName(int myId,String newUsername){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","change_name")
+                .addData("my_id", Integer.toString(myId))
+                .addData("username",newUsername)
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
 
     public static int getMessages(int myId,int targetId){
         int msgId = getFreeMsgId();
@@ -144,6 +166,42 @@ public class Messages {
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","get_profile")
                 .addData("target_id", Integer.toString(profileId))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
+    public static int addUserToMap(int myId,int tableId){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","add_user_to_map")
+                .addData("my_id", Integer.toString(myId))
+                .addData("table_id", Integer.toString(tableId))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
+    public static int removeUserFromMap(int myId,int tableId){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","remove_user_from_map")
+                .addData("my_id", Integer.toString(myId))
+                .addData("table_id", Integer.toString(tableId))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
+    public static int getUserOnMap(int myId,int tableId){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","get_users_on_map")
+                .addData("my_id", Integer.toString(myId))
+                .addData("table_id", Integer.toString(tableId))
                 .setTtl(1200)
                 .build());
         return msgId;

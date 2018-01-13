@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
@@ -22,6 +23,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import dag.mobillabb4.CustomAdapters.MessageViewAdapter;
 import dag.mobillabb4.Firebase.FirebaseMessage;
@@ -51,6 +54,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         toolbar.setOnMenuItemClickListener(new Menu(this));
         Toolbar toolbarbot = findViewById(R.id.bottom_toolbar);
         toolbarbot.bringToFront();
+        toolbar.bringToFront();
         ImageButton backBut =findViewById(R.id.imageButton);
         backBut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,7 +69,7 @@ public class ChatRoomActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //TODO:gör så att backend skickar ut message till båda istället för att skriva det själv
                 try {
-                    String msg = "{\"userid\":\""+AccountModel.getMyAccount().getId()+"\",\"username\": \"me\",\"text\":\""+message.getText().toString()+"\"}";
+                    String msg = "{\"userid\":\""+AccountModel.getMyAccount().getId()+"\",\"username\": \"me\",\"messageBody\":\""+message.getText().toString()+"\",\"timeStamp\":\""+ new Date().getTime() +"\"}";
                     Log.i("Send",msg);
                     Messages.getMessages().add(new JSONObject(msg));
                 }catch(JSONException e){
@@ -97,7 +101,8 @@ public class ChatRoomActivity extends AppCompatActivity {
                     }
                     adapter = new MessageViewAdapter(context,Messages.getMessages());
                     listView.setAdapter(adapter);
-                }catch(JSONException e){
+                }catch(JSONException|NullPointerException e){
+                    Toast.makeText(getApplicationContext(),"Couldn't retreive messages",Toast.LENGTH_LONG);
                     Log.i("ChatRoom",e.getMessage());
                 }
                 progress.setVisibility(View.INVISIBLE);

@@ -39,41 +39,7 @@ public class AccountModel {
     public static void setTargetAccount(AccountModel targetAccount) {
         AccountModel.targetAccount = targetAccount;
     }
-    static ArrayList<AccountModel> conversations = new ArrayList<>();
 
-    public static ArrayList<AccountModel> getConversations() {
-        return conversations;
-    }
-
-    public static void setConversations(ArrayList<AccountModel> conversations) {
-        AccountModel.conversations = conversations;
-    }
-
-    static ArrayList<AccountModel> filteredConversations = new ArrayList<>();
-
-    public static ArrayList<AccountModel> getFilteredConversations() {
-        return filteredConversations;
-    }
-
-    public static void setFilteredConversations(ArrayList<AccountModel> filteredConversations) {
-        AccountModel.filteredConversations = filteredConversations;
-    }
-
-    public static void filterConversations(String filterString){
-        filteredConversations = new ArrayList<>();
-        Log.i("text",filterString);
-        if(filterString.equals("")){
-            setFilteredConversations(conversations);
-        }try {
-            for (AccountModel am : conversations) {
-                if (am.getUsername().startsWith(filterString)) {
-                    filteredConversations.add(am);
-                }
-            }
-        }catch(NullPointerException e){
-            Log.i("filterConversation",e.getMessage());
-        }
-    }
 
     public AccountModel(){
 

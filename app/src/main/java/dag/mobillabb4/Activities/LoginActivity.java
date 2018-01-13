@@ -103,7 +103,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             try {
                                 Log.i("hehe","tjoho3");
                                 if (result.getInformation().get("status").equals("success")) {
-                                    Log.i("hehe","tjoho4");
                                     AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                                     Intent intent = new Intent(context, MainChatActivity.class);
                                     startActivity(intent);

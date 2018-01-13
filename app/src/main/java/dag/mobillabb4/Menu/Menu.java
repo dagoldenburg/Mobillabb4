@@ -34,6 +34,9 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
     private Activity activity;
     private Intent intent;
     private RequestTask addTask;
+    private RequestTask changeNameTask;
+    private RequestTask stopMapTask;
+    private RequestTask logoutTask;
 
     public Menu(Activity cont){
         activity = cont;
@@ -88,9 +91,58 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     intent = new Intent(activity, ProfileActivity.class);
                     activity.startActivity(intent);
                     return true;
-                case R.id.preferences:
-                    intent = new Intent(activity, PreferencesActivity.class);
-                    activity.startActivity(intent);
+                case R.id.changeName:
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
+                    builder2.setTitle("Enter new username");
+                    final EditText input2 = new EditText(activity);
+                    input2.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                    builder2.setView(input2);
+                    builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            changeNameTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                                @Override
+                                public void onTaskCompleted(FirebaseMessage result) {
+                                    try {
+                                        if (result.getInformation().get("status").toString().equals("success")) {
+                                            Toast.makeText(activity, "Name change successful", Toast.LENGTH_LONG).show();
+                                        } else {
+                                            Toast.makeText(activity, "Name change failed", Toast.LENGTH_LONG).show();
+                                        }
+                                    }catch(JSONException|NullPointerException e){
+                                        Toast.makeText(activity, "Name change failed", Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            }, Messages.changeName(AccountModel.getMyAccount().getId(),input2.getText().toString()));
+                            changeNameTask.execute();
+                        }
+                    });
+                    builder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    builder2.show();
+
+                    return true;
+                case R.id.uploadPicture:
+                    changeNameTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted(FirebaseMessage result) {
+
+                        }
+                    }, 1);
+                    changeNameTask.execute();
+                    return true;
+                case R.id.stopMap:
+                    stopMapTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted(FirebaseMessage result) {
+
+                        }
+                    }, 1);
+                    stopMapTask.execute();
                     return true;
                 case R.id.logout:
                     try {
@@ -98,6 +150,13 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     }catch(IllegalStateException e){
 
                     }
+                    logoutTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted(FirebaseMessage result) {
+
+                        }
+                    }, Messages.logout(AccountModel.getMyAccount().getId()));
+                    logoutTask.execute();
                     AccountModel.logOut();
                     activity.finish();
                     return true;

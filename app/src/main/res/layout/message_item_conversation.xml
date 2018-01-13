@@ -1,14 +1,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:padding="6dip" >
+    android:layout_height="match_parent"
+    android:padding="6dip">
 
     <TextView
-        android:id="@+id/rightFirst"
+        android:id="@+id/leftFirst"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/secondLine"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
         android:gravity="left"
@@ -17,13 +17,14 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/rightSecond"
+        android:id="@+id/leftSecond"
         android:layout_width="fill_parent"
         android:layout_height="26dip"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:layout_centerVertical="true"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="25dp"
         android:gravity="left"
         android:singleLine="true"
         android:text="Description"
@@ -35,8 +36,7 @@
         android:layout_height="26dip"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="25dp"
+        android:layout_below="@+id/leftSecond"
         android:gravity="left"
         android:singleLine="true"
         android:text="Description2"

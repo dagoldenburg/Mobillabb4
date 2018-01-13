@@ -3,6 +3,7 @@ package dag.mobillabb4.Activities;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -14,11 +15,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+
+import dag.mobillabb4.Firebase.FirebaseMessage;
+import dag.mobillabb4.Firebase.Messages;
+import dag.mobillabb4.Model.AccountModel;
 import dag.mobillabb4.R;
+import dag.mobillabb4.Service.MapService;
+import dag.mobillabb4.Tasks.RequestTask;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
+    private Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +37,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        serviceIntent = new Intent(getApplicationContext(), MapService.class);
+        startService(serviceIntent);
     }
 
 
@@ -53,12 +64,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.test)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.setOnInfoWindowClickListener(this);
+        //TODO: while loop för att updatera efter mapservice 
     }
 
     @Override
     public void onInfoWindowClick(Marker marker) {
         Toast.makeText(this, "Info window clicked",
                 Toast.LENGTH_SHORT).show();
+        //TODO: set target and load profile
         Intent intent = new Intent(getApplicationContext(),ProfileActivity.class);
         startActivity(intent);
     }
