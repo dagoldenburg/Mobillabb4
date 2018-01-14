@@ -2,6 +2,9 @@ package dag.mobillabb4.Activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -25,6 +28,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import dag.mobillabb4.CustomAdapters.ListViewAdapter;
@@ -48,13 +53,13 @@ public class MainChatActivity extends AppCompatActivity{
     private EditText search;
     private ListViewAdapter adapter;
     private RequestTask deleteTask;
+    private RequestTask changePicTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyFirebaseMessaging.cleanUpMessageHeap();
         setContentView(R.layout.activity_chat);
-
         Log.i("asd", FirebaseInstanceId.getInstance().getToken());
         Toolbar toolbar =  findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.options_menu);
@@ -64,6 +69,7 @@ public class MainChatActivity extends AppCompatActivity{
         mapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.i("accwtf",AccountModel.getMyAccount().getId()+"main");
                 Intent intent = new Intent(context, MapsActivity.class);
                 startActivity(intent);
             }
@@ -83,7 +89,8 @@ public class MainChatActivity extends AppCompatActivity{
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 Log.i("text","change");
                 ConversationModel.filterConversations(s.toString());
-                adapter.notifyDataSetChanged();
+                adapter = new ListViewAdapter(getApplicationContext(),ConversationModel.getFilteredConversations());
+                listView.setAdapter(adapter);
             }
             @Override
             public void afterTextChanged(Editable s) {}
@@ -154,17 +161,11 @@ public class MainChatActivity extends AppCompatActivity{
         final String targetUser = ConversationModel.getConversations().get(temp).getOwner().getUsername();
         switch (item.getItemId()) {
             case R.id.goToProf:
-
                 AccountModel.setTargetAccount(new AccountModel(targetId,targetUser));
                 Intent intent = new Intent(this, ProfileActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.deleteConversation:
-                Log.i("ListViewMenu","deleteconversation");
-                Log.i("ListViewmenu",ConversationModel.getConversations().toString());
-                Log.i("ListViewmenu",ConversationModel.getConversations().get(temp).toString());
-
-                Log.i("ListViewMenu",""+targetId);
                 deleteTask = new RequestTask(new RequestTask.OnTaskCompleted() {
                     @Override
                     public void onTaskCompleted(FirebaseMessage result) {
@@ -183,6 +184,40 @@ public class MainChatActivity extends AppCompatActivity{
                 return true;
             default:
                 return super.onContextItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode){
+            case 1:
+                Uri uri = data.getData();
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] byteArray = stream.toByteArray();
+                changePicTask = new RequestTask(new RequestTask.OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted(FirebaseMessage result) {
+                            try {
+                                if(result.getInformation().get("status").equals("success")){
+                                    Toast.makeText(getApplicationContext(),"Profile picture uploaded",Toast.LENGTH_LONG);
+                                }else{
+                                    Toast.makeText(getApplicationContext(),"Profile picture failed to upload",Toast.LENGTH_LONG);
+                                }
+                            } catch (NullPointerException|JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, Messages.uploadImage(AccountModel.getMyAccount().getId(),byteArray));
+                changePicTask.execute();
+            default:return;
         }
     }
 

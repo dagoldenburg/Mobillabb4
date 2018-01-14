@@ -1,6 +1,8 @@
 package dag.mobillabb4.Activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -39,6 +41,10 @@ public class ProfileActivity extends AppCompatActivity {
                 try {
                         birthday.setText(result.getInformation().get("birthday").toString());
                         name.setText(result.getInformation().get("name").toString());
+                        byte[] byteArray =result.getInformation().get("image").toString().getBytes();
+                        Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                        profilePic.setImageBitmap(Bitmap.createScaledBitmap(bmp, profilePic.getWidth(),
+                            profilePic.getHeight(), false));
                         birthday.setVisibility(View.VISIBLE);
                         name.setVisibility(View.VISIBLE);
                 }catch(NullPointerException|JSONException e){

@@ -41,7 +41,7 @@ public class AccountModel {
     }
 
 
-    public AccountModel(){
+    private AccountModel(){
 
     }
 

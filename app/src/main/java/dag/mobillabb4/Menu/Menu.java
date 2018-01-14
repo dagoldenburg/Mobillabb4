@@ -24,6 +24,7 @@ import dag.mobillabb4.Firebase.FirebaseMessage;
 import dag.mobillabb4.Firebase.Messages;
 import dag.mobillabb4.Model.AccountModel;
 import dag.mobillabb4.R;
+import dag.mobillabb4.Service.MapService;
 import dag.mobillabb4.Tasks.RequestTask;
 
 /**
@@ -34,13 +35,15 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
     private Activity activity;
     private Intent intent;
     private RequestTask addTask;
-    private RequestTask changeNameTask;
     private RequestTask stopMapTask;
     private RequestTask logoutTask;
+    private RequestTask changeNameTask;
+    private int PICK_IMAGE_REQUEST = 1;
 
     public Menu(Activity cont){
         activity = cont;
     }
+
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
@@ -88,7 +91,7 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     return true;
                 case R.id.profile:
                     AccountModel.setTargetAccount(AccountModel.getMyAccount());
-                    intent = new Intent(activity, ProfileActivity.class);
+                    Intent intent = new Intent(activity, ProfileActivity.class);
                     activity.startActivity(intent);
                     return true;
                 case R.id.changeName:
@@ -127,22 +130,31 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
 
                     return true;
                 case R.id.uploadPicture:
-                    changeNameTask = new RequestTask(new RequestTask.OnTaskCompleted() {
-                        @Override
-                        public void onTaskCompleted(FirebaseMessage result) {
+                    Intent intentpicture = new Intent();
+                    intentpicture.setType("image/*");
+                    intentpicture.setAction(Intent.ACTION_GET_CONTENT);
+                    activity.startActivityForResult(Intent.createChooser(intentpicture, "Select Picture"), PICK_IMAGE_REQUEST);
 
-                        }
-                    }, 1);
-                    changeNameTask.execute();
                     return true;
                 case R.id.stopMap:
                     stopMapTask = new RequestTask(new RequestTask.OnTaskCompleted() {
                         @Override
                         public void onTaskCompleted(FirebaseMessage result) {
-
+                            try {
+                                if (result.getInformation().get("status").equals("success")) {
+                                    Toast.makeText(activity,"Stopped map tracking",Toast.LENGTH_LONG).show();
+                                }
+                                else{
+                                    Toast.makeText(activity,"Failed to stop maptracking",Toast.LENGTH_LONG).show();
+                                }
+                            }catch(JSONException|NullPointerException e){
+                                e.printStackTrace();
+                                Toast.makeText(activity,"Failed to stop maptracking",Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }, 1);
+                    }, Messages.removeUserFromMap(AccountModel.getMyAccount().getId(), MapService.getMapChoice()));
                     stopMapTask.execute();
+                    activity.getApplicationContext().stopService(new Intent(activity.getApplicationContext(), MapService.class));
                     return true;
                 case R.id.logout:
                     try {
@@ -158,7 +170,9 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     }, Messages.logout(AccountModel.getMyAccount().getId()));
                     logoutTask.execute();
                     AccountModel.logOut();
+                    Intent intent2 = new Intent(activity,LoginActivity.class);
                     activity.finish();
+                    activity.startActivity(intent2);
                     return true;
                 default:
                     return false;

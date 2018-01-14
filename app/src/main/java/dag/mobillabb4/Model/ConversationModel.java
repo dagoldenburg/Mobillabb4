@@ -22,7 +22,7 @@ public class ConversationModel {
 
     public static ArrayList<ConversationModel> conversations = new ArrayList<>();
 
-    public static ArrayList<ConversationModel> getConversations() {
+    public synchronized static ArrayList<ConversationModel> getConversations() {
         return conversations;
     }
 
@@ -54,10 +54,12 @@ public class ConversationModel {
     public static void filterConversations(String filterString){
         filteredConversations = new ArrayList<>();
         Log.i("text",filterString);
+        ArrayList<ConversationModel> temp = getConversations();
         if(filterString.equals("")){
             setFilteredConversations(conversations);
+            return;
         }try {
-            for (ConversationModel am : conversations) {
+            for (ConversationModel am : temp) {
                 if (am.getOwner().getUsername().startsWith(filterString)) {
                     filteredConversations.add(am);
                 }

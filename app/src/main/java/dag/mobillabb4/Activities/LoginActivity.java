@@ -56,12 +56,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        startService(new Intent(this,MyFirebaseInstance.class));
         if(AccountModel.getMyAccount()!=null){
             Intent intent = new Intent(context, MainChatActivity.class);
+            finish();
             startActivity(intent);
         }
+        setContentView(R.layout.activity_main);
+        startService(new Intent(this,MyFirebaseInstance.class));
         loginButton = findViewById(R.id.button);
         loginButton.setOnClickListener(LoginListener);
         registerButton = findViewById(R.id.button3);
@@ -105,6 +106,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 if (result.getInformation().get("status").equals("success")) {
                                     AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                                     Intent intent = new Intent(context, MainChatActivity.class);
+                                    finish();
                                     startActivity(intent);
                                 }
                                 else{
@@ -140,6 +142,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             Log.i("hehe","tjoho2");
                             AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                             Intent intent = new Intent(context, MainChatActivity.class);
+                            finish();
                             startActivity(intent);
                         }
                         else{
@@ -182,6 +185,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         if (Integer.parseInt(result.getInformation().get("id").toString())!=-1) {
                             AccountModel.initMyAcc(Integer.parseInt(result.getInformation().get("id").toString()));
                             Intent intent = new Intent(context, MainChatActivity.class);
+                            finish();
                             startActivity(intent);
                         } else
                             errorText.setText("Invalid login information");

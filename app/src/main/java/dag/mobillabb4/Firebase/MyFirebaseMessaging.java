@@ -22,7 +22,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
 
     private static ArrayList<FirebaseMessage> messageHeap = new ArrayList<>();
 
-    public static ArrayList<FirebaseMessage> getMessageHeap() {
+    public synchronized static ArrayList<FirebaseMessage> getMessageHeap() {
         return messageHeap;
     }
 
@@ -37,6 +37,15 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         for(FirebaseMessage fm : cleanUpList){
             messageHeap.remove(fm);
         }
+    }
+    private static boolean msgReceived;
+
+    public static boolean isMsgReceived() {
+        return msgReceived;
+    }
+
+    public static void setMsgReceived(boolean msgReceived) {
+        MyFirebaseMessaging.msgReceived = msgReceived;
     }
 
     @Override
@@ -65,8 +74,10 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
                         MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getData().get("messageBody"));
                         if (Integer.parseInt(obj.get("userId").toString()) == AccountModel.getTargetAccount().getId()) {
                             String msg = "{\"userid\":\"" + Integer.parseInt(obj.get("userId").toString()) + "\",\"username\": \"" +
-                                    AccountModel.getTargetAccount().getUsername() + "\",\"text\":\"" + obj.get("messageBody").toString() + "\"}";
+                                    AccountModel.getTargetAccount().getUsername() + "\",\"messageBody\":\"" +
+                                    obj.get("messageBody").toString() + "\",\"timeStamp\":\""+obj.get("timeStamp").toString()+"\"}";
                             Messages.getMessages().add(new JSONObject(msg));
+                            msgReceived = true;
                         }
                     }
                     //TODO: notification när man receive message

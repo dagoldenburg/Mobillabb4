@@ -3,6 +3,8 @@ package dag.mobillabb4.Tasks;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import dag.mobillabb4.Firebase.FirebaseMessage;
 import dag.mobillabb4.Firebase.MyFirebaseMessaging;
 
@@ -33,8 +35,9 @@ public class RequestTask extends AsyncTask<String,Void,FirebaseMessage> {
         long now = System.currentTimeMillis();
         FirebaseMessage removeMessage = null;
         boolean keepGoing = true;
+        ArrayList<FirebaseMessage> local = MyFirebaseMessaging.getMessageHeap();
         while(now+10000>System.currentTimeMillis() && keepGoing) {
-            for (FirebaseMessage fm : MyFirebaseMessaging.getMessageHeap()) {
+            for (FirebaseMessage fm : local) {
                 if (fm.getId() == msgId) {
                     removeMessage = fm;
                     keepGoing=false;

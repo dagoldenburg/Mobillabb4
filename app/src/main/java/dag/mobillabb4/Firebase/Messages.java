@@ -31,7 +31,7 @@ public class Messages {
 
     public static int login(String email, String password){
         int msgId = getFreeMsgId();
-        Log.i("Login",email+" "+password+" "+msgId);
+        FirebaseMessaging fm = FirebaseMessaging.getInstance();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","login")
@@ -125,6 +125,18 @@ public class Messages {
         return msgId;
     }
 
+    public static int uploadImage(int from,byte[] image){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","upload_image")
+                .addData("my_id", Integer.toString(from))
+                .addData("image",new String(image))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
     public static int getChatContacts(int myId){
         int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
@@ -171,13 +183,15 @@ public class Messages {
         return msgId;
     }
 
-    public static int addUserToMap(int myId,int tableId){
+    public static int addUserToMap(int myId,int tableId, double lat, double lng){
         int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","add_user_to_map")
                 .addData("my_id", Integer.toString(myId))
                 .addData("table_id", Integer.toString(tableId))
+                .addData("lat", Double.toString(lat))
+                .addData("lng", Double.toString(lng))
                 .setTtl(1200)
                 .build());
         return msgId;

@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,6 +30,7 @@ import java.util.Date;
 import dag.mobillabb4.CustomAdapters.MessageViewAdapter;
 import dag.mobillabb4.Firebase.FirebaseMessage;
 import dag.mobillabb4.Firebase.Messages;
+import dag.mobillabb4.Firebase.MyFirebaseMessaging;
 import dag.mobillabb4.Menu.Menu;
 import dag.mobillabb4.Model.AccountModel;
 import dag.mobillabb4.R;
@@ -69,20 +71,22 @@ public class ChatRoomActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //TODO:gör så att backend skickar ut message till båda istället för att skriva det själv
                 try {
-                    String msg = "{\"userid\":\""+AccountModel.getMyAccount().getId()+"\",\"username\": \"me\",\"messageBody\":\""+message.getText().toString()+"\",\"timeStamp\":\""+ new Date().getTime() +"\"}";
+                    String msg = "{\"userid\":\""+AccountModel.getMyAccount().getId()+"\",\"username\": \"me\",\"messageBody\":\""+message.getText().toString()+"\",\"timeStamp\":\""+ new Timestamp(new Date().getTime()) +"\"}";
                     Log.i("Send",msg);
                     Messages.getMessages().add(new JSONObject(msg));
                 }catch(JSONException e){
                     Log.i("Send",e.getMessage());
                 }
-                adapter = new MessageViewAdapter(context,Messages.getMessages());
-                listView.setAdapter(adapter);
+                listView.invalidateViews();
+                //adapter = new MessageViewAdapter(context,Messages.getMessages());
+                //listView.setAdapter(adapter);
                 Messages.sendMessage(AccountModel.getMyAccount().getId(),AccountModel.getTargetAccount().getId(),message.getText().toString());
                 Log.i("send",message.getText().toString());
                 message.setText("");
             }
         });
         sendBut.bringToFront();
+        backBut.bringToFront();
         Messages.resetMessages();
         context = this;
         listView = findViewById(R.id.messageList);
@@ -116,8 +120,10 @@ public class ChatRoomActivity extends AppCompatActivity {
 
             @Override
             public void run() {
-                adapter = new MessageViewAdapter(context,Messages.getMessages());
-                    listView.setAdapter(adapter);
+                if(MyFirebaseMessaging.isMsgReceived()) {
+                    MyFirebaseMessaging.setMsgReceived(false);
+                    listView.invalidateViews();
+                }
                 handler.postDelayed( this,  1000 );
             }
         },  1000 );
