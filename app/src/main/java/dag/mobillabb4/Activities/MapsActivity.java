@@ -59,7 +59,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         chooseTable();
-
     }
 
     private void chooseTable(){
@@ -88,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        MapService.setLm(lm);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -104,7 +104,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }else{
             chooseTable();
         }
-        MapService.setLm(lm);
     }
 
     private void startService(int choice){
@@ -126,48 +125,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * installed Google Play services and returned to the app.
      */
 
+    Handler handler = new Handler();
     LinkedList<Marker> markers = new LinkedList<>();
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        final Handler handler = new Handler();
-
-        handler.postDelayed( new Runnable() {
-
-            @Override
-            public void run() {
-                if(MapService.isChange()){
-                    //TODO:skriv över i den listan som visas
-                    Log.i("Change","change done");
-                    int i = 0;
-                    for(MapUserModel mum : MapUserModel.getMapUsers()){
-                        Log.i("Change","name "+mum.getOwner().getUsername()
-                                +" lat " +mum.getMarker().getPosition().latitude
-                                +" long "+mum.getMarker().getPosition().longitude);
-                        try{
-                            Marker marker = mMap.addMarker(mum.getMarker());
-                            marker.setTag(mum.getOwner().getId());
-                            markers.set(i++,marker);
-                        }catch(Exception e){
+        mMap.setOnInfoWindowClickListener(this);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (MapService.isChange()) {
+                        markers.clear();
+                        markers = new LinkedList<>();
+                        mMap.clear();
+                        Log.i("Change", "change done"+markers.size());
+                        for (MapUserModel mum : MapUserModel.getMapUsers()) {
+                            Log.i("Change", "name " + mum.getOwner().getUsername()
+                                    + " lat " + mum.getMarker().getPosition().latitude
+                                    + " long " + mum.getMarker().getPosition().longitude);
                             Marker marker = mMap.addMarker(mum.getMarker());
                             marker.setTag(mum.getOwner().getId());
                             markers.add(marker);
-
                         }
                     }
-                    for(;i<MapUserModel.getMapUsers().size();i++) {
-                        try {
-                            markers.get(i).remove();
-                        }catch(IndexOutOfBoundsException e){
-
-                        }
-                    }
+                    handler.postDelayed(this,1000);
                 }
-                handler.postDelayed( this,  5000 );
-            }
-        },  1000 );
+            }, 1000);
     }
+
 
     @Override
     public void onInfoWindowClick(Marker marker) {
@@ -182,5 +167,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
         markers.clear();
         MapUserModel.setMapUsers(new LinkedList<MapUserModel>());
+        handler=null;
     }
 }

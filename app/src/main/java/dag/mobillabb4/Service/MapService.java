@@ -70,15 +70,24 @@ public class MapService extends Service implements LocationListener {
         super.onCreate();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i("dead","dead");
+        t.interrupt();
+        run=false;
+    }
 
+    Thread t;
     @Override
     public int onStartCommand(final Intent intent, int flags, final int startId) {
+        update = true;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.i("otur","otur");
             return Service.START_NOT_STICKY;
         }
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 15000, 10, this);
-        Thread t = new Thread("MyService(" + startId + ")") {
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 5, this);
+        t = new Thread("MyService(" + startId + ")") {
             @Override
             public void run() {
                 _onStart(intent, startId);
@@ -88,13 +97,13 @@ public class MapService extends Service implements LocationListener {
         t.start();
         return Service.START_NOT_STICKY;
     }
-
+    boolean run = true;
     private void _onStart(final Intent intent, final int startId) {
-
+        run = true;
         long now = System.currentTimeMillis();
         updateUsersTaskImplementation(mapChoice);
-        while (true) {
-            if (System.currentTimeMillis() > now + 30000) {
+        while (run) {
+            if (System.currentTimeMillis() > now + 10000) {
                 now = System.currentTimeMillis();
                 updateUsersTaskImplementation(mapChoice);
             }
@@ -161,7 +170,6 @@ public class MapService extends Service implements LocationListener {
                                             .snippet("You have "+interest+" interests in common")
                                             .icon(color),temp));
                         }
-
                         change = true;
                     }
                 }catch(JSONException|NullPointerException e){
@@ -180,11 +188,19 @@ public class MapService extends Service implements LocationListener {
         MapService.change = change;
     }
 
+    static boolean update = true;
+    public static void turnUpdateOff(){
+        update = false;
+    }
     @Override
     public void onLocationChanged(Location location) {
-        lng = location.getLongitude();
-        lat = location.getLatitude();
-        addUserTaskImplementation(mapChoice);
+        if(update) {
+            MapUserModel.setMapUsers(new LinkedList<MapUserModel>());
+            lng = location.getLongitude();
+            lat = location.getLatitude();
+            Log.i("longlat", lng + " " + lat);
+            addUserTaskImplementation(mapChoice);
+        }
     }
 
     @Override

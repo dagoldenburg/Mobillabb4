@@ -71,8 +71,9 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
                     Log.i("Firebase", obj.get("messageId").toString());
                     Log.i("Firebase", map.toString() + "   " + hej);
                     if(obj.get("type").toString().equals("msg")) {
-                        MyNotificationManager.getInstance(this).displayNotification("Firebase", remoteMessage.getData().get("messageBody"));
+                        MyNotificationManager.getInstance(this).displayNotification("MapChat", remoteMessage.getData().get("messageBody"));
                         if (Integer.parseInt(obj.get("userId").toString()) == AccountModel.getTargetAccount().getId()) {
+                            Log.i("gotmsg","gotmsg");
                             String msg = "{\"userid\":\"" + Integer.parseInt(obj.get("userId").toString()) + "\",\"username\": \"" +
                                     AccountModel.getTargetAccount().getUsername() + "\",\"messageBody\":\"" +
                                     obj.get("messageBody").toString() + "\",\"timeStamp\":\""+obj.get("timeStamp").toString()+"\"}";
@@ -80,7 +81,6 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
                             msgReceived = true;
                         }
                     }
-                    //TODO: notification när man receive message
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

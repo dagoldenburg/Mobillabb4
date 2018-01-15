@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
@@ -22,6 +23,15 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONArray;
@@ -30,6 +40,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import dag.mobillabb4.CustomAdapters.ListViewAdapter;
@@ -87,7 +98,6 @@ public class MainChatActivity extends AppCompatActivity{
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.i("text","change");
                 ConversationModel.filterConversations(s.toString());
                 adapter = new ListViewAdapter(getApplicationContext(),ConversationModel.getFilteredConversations());
                 listView.setAdapter(adapter);
@@ -192,7 +202,12 @@ public class MainChatActivity extends AppCompatActivity{
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode){
             case 1:
-                Uri uri = data.getData();
+                Uri uri;
+                try {
+                     uri = data.getData();
+                }catch(NullPointerException e){
+                    return;
+                }
                 Bitmap bitmap = null;
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
@@ -202,23 +217,60 @@ public class MainChatActivity extends AppCompatActivity{
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byte[] byteArray = stream.toByteArray();
-                changePicTask = new RequestTask(new RequestTask.OnTaskCompleted() {
-                        @Override
-                        public void onTaskCompleted(FirebaseMessage result) {
-                            try {
-                                if(result.getInformation().get("status").equals("success")){
-                                    Toast.makeText(getApplicationContext(),"Profile picture uploaded",Toast.LENGTH_LONG);
-                                }else{
-                                    Toast.makeText(getApplicationContext(),"Profile picture failed to upload",Toast.LENGTH_LONG);
-                                }
-                            } catch (NullPointerException|JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, Messages.uploadImage(AccountModel.getMyAccount().getId(),byteArray));
-                changePicTask.execute();
+                String send = Base64.encodeToString(byteArray,Base64.DEFAULT);
+                uploadPicture(send);
             default:return;
         }
     }
+    private void uploadPicture(String image) {
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        //String URL = "https://20180115t010244-dot-mapchat-191515.appspot.com/upload?image="+image+"&id="+AccountModel.getMyAccount().getId();
 
+        String URL = "https://20180115t013035-dot-mapchat-191515.appspot.com/Image/upload";
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("image", image);
+            jsonBody.put("id", AccountModel.getMyAccount().getId());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        final String requestBody = jsonBody.toString();
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.i("VOLLEY", response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("VOLLEY", error.toString());
+            }
+        }) {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    return requestBody == null ? null : requestBody.getBytes("utf-8");
+                } catch (UnsupportedEncodingException uee) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                String responseString = "";
+                if (response != null) {
+                    responseString = String.valueOf(response.statusCode);
+                    // can get more details such as response.headers
+                }
+                return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
 }

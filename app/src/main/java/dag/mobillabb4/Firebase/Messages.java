@@ -31,7 +31,6 @@ public class Messages {
 
     public static int login(String email, String password){
         int msgId = getFreeMsgId();
-        FirebaseMessaging fm = FirebaseMessaging.getInstance();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","login")
@@ -125,13 +124,13 @@ public class Messages {
         return msgId;
     }
 
-    public static int uploadImage(int from,byte[] image){
+    public static int uploadImage(int from,String send){
         int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","upload_image")
                 .addData("my_id", Integer.toString(from))
-                .addData("image",new String(image))
+                .addData("image",send)
                 .setTtl(1200)
                 .build());
         return msgId;
@@ -160,6 +159,39 @@ public class Messages {
         return msgId;
     }
 
+    public static int getAllInterests(){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","get_all_interests")
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
+    public static int getAllUsersInterests(int myId){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","get_all_users_interests")
+                .addData("my_id", Integer.toString(myId))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
+    public static int updateUserInterest(int myId,int interestId){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","update_user_interest")
+                .addData("my_id", Integer.toString(myId))
+                .addData("interest_id", Integer.toString(interestId))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
     public static int getMessages(int myId,int targetId){
         int msgId = getFreeMsgId();
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
@@ -177,6 +209,17 @@ public class Messages {
         fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
                 .setMessageId(Integer.toString(msgId))
                 .addData("type","get_profile")
+                .addData("target_id", Integer.toString(profileId))
+                .setTtl(1200)
+                .build());
+        return msgId;
+    }
+
+    public static int getProfilePicture(int profileId){
+        int msgId = getFreeMsgId();
+        fm.send(new RemoteMessage.Builder("838320272447" + "@gcm.googleapis.com")
+                .setMessageId(Integer.toString(msgId))
+                .addData("type","get_profile_picture")
                 .addData("target_id", Integer.toString(profileId))
                 .setTtl(1200)
                 .build());
@@ -235,7 +278,7 @@ public class Messages {
     
     private static boolean loop(int msgId){
         for (FirebaseMessage fb : MyFirebaseMessaging.getMessageHeap()) {
-            if (fb.getId() == msgId) {
+            if (fb.getId() == msgId || fb.getId() == msgId+1) {
                 return false;
             }
         }

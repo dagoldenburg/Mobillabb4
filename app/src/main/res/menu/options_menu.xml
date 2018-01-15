@@ -10,6 +10,9 @@
         android:id="@+id/changeName"
         android:title="Change username" />
     <item
+        android:id="@+id/addInterest"
+        android:title="Edit interests" />
+    <item
         android:id="@+id/uploadPicture"
         android:title="Upload profile picture" />
     <item

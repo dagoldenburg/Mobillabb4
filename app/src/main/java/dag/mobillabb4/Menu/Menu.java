@@ -11,11 +11,24 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.Auth;
 
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 
 import dag.mobillabb4.Activities.ChatRoomActivity;
+import dag.mobillabb4.Activities.InterestActivity;
 import dag.mobillabb4.Activities.LoginActivity;
 import dag.mobillabb4.Activities.MainChatActivity;
 import dag.mobillabb4.Activities.PreferencesActivity;
@@ -94,6 +107,11 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     Intent intent = new Intent(activity, ProfileActivity.class);
                     activity.startActivity(intent);
                     return true;
+                case R.id.addInterest:
+                    AccountModel.setTargetAccount(AccountModel.getMyAccount());
+                    Intent intent55 = new Intent(activity, InterestActivity.class);
+                    activity.startActivity(intent55);
+                    return true;
                 case R.id.changeName:
                     AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
                     builder2.setTitle("Enter new username");
@@ -134,29 +152,14 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     intentpicture.setType("image/*");
                     intentpicture.setAction(Intent.ACTION_GET_CONTENT);
                     activity.startActivityForResult(Intent.createChooser(intentpicture, "Select Picture"), PICK_IMAGE_REQUEST);
-
                     return true;
                 case R.id.stopMap:
-                    stopMapTask = new RequestTask(new RequestTask.OnTaskCompleted() {
-                        @Override
-                        public void onTaskCompleted(FirebaseMessage result) {
-                            try {
-                                if (result.getInformation().get("status").equals("success")) {
-                                    Toast.makeText(activity,"Stopped map tracking",Toast.LENGTH_LONG).show();
-                                }
-                                else{
-                                    Toast.makeText(activity,"Failed to stop maptracking",Toast.LENGTH_LONG).show();
-                                }
-                            }catch(JSONException|NullPointerException e){
-                                e.printStackTrace();
-                                Toast.makeText(activity,"Failed to stop maptracking",Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    }, Messages.removeUserFromMap(AccountModel.getMyAccount().getId(), MapService.getMapChoice()));
-                    stopMapTask.execute();
+                    MapService.turnUpdateOff();
                     activity.getApplicationContext().stopService(new Intent(activity.getApplicationContext(), MapService.class));
+                    Toast.makeText(activity,"Stopped map tracking",Toast.LENGTH_LONG).show();
                     return true;
                 case R.id.logout:
+                    activity.getApplicationContext().stopService(new Intent(activity.getApplicationContext(), MapService.class));
                     try {
                         Auth.GoogleSignInApi.signOut(LoginActivity.getGoogleApiClient());
                     }catch(IllegalStateException e){
@@ -178,5 +181,6 @@ public class Menu implements android.support.v7.widget.Toolbar.OnMenuItemClickLi
                     return false;
             }
     }
+
 
 }

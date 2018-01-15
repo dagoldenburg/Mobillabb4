@@ -52,8 +52,6 @@ public class ChatRoomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room);
         Toolbar toolbar =  findViewById(R.id.top_toolbar);
-        toolbar.inflateMenu(R.menu.options_menu);
-        toolbar.setOnMenuItemClickListener(new Menu(this));
         Toolbar toolbarbot = findViewById(R.id.bottom_toolbar);
         toolbarbot.bringToFront();
         toolbar.bringToFront();
@@ -122,7 +120,8 @@ public class ChatRoomActivity extends AppCompatActivity {
             public void run() {
                 if(MyFirebaseMessaging.isMsgReceived()) {
                     MyFirebaseMessaging.setMsgReceived(false);
-                    listView.invalidateViews();
+                    adapter = new MessageViewAdapter(context,Messages.getMessages());
+                    listView.setAdapter(adapter);
                 }
                 handler.postDelayed( this,  1000 );
             }
